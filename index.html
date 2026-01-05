@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Nikita’s Forestspace</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- ENTER OVERLAY (solves autoplay restrictions) -->
+  <div id="enterOverlay" class="overlay">
+    <div class="overlayCard">
+      <h1>🌲 Enter the Forest 🌲</h1>
+      <p>2010 vibes only. Click to begin (music + kitties).</p>
+      <button id="enterBtn">Enter ✨</button>
+      <p class="tiny">(If audio doesn’t start, your browser is protecting you. Click again.)</p>
+    </div>
+  </div>
+
+  <!-- AUDIO: use YOUR OWN file or embed player. Don’t upload copyrighted tracks. -->
+  <audio id="bgm" preload="auto" loop>
+    <!-- Replace with your own licensed audio file -->
+    <source src="assets/music/your-2010-pop-vibes.mp3" type="audio/mpeg">
+  </audio>
+
+  <!-- LAYERS -->
+  <div class="bgLayer"></div>
+  <div class="parallaxLayer"></div>
+
+  <!-- KITTIES -->
+  <img class="sprite kitty orange" src="assets/kitty-orange.png" alt="orange kitty" />
+  <img class="sprite kitty black" src="assets/kitty-black.png" alt="black kitty" />
+  <img class="sprite kitty fluffy" src="assets/kitty-fluffy.png" alt="fluffy kitty" />
+
+  <!-- PAGE CONTENT -->
+  <main class="container">
+    <header class="profileHeader">
+      <div class="badge">✨ ONLINE NOW ✨</div>
+      <h2>Nikita’s Forestspace</h2>
+      <div class="status">Status: “in my mushroom era 🍄”</div>
+    </header>
+
+    <section class="grid">
+      <div class="card">
+        <h3>About Me</h3>
+        <p>
+          Welcome to my enchanted forest profile. If you see the orange kitty,
+          that’s me sprinting between boulders like I forgot I left the oven on.
+        </p>
+        <ul class="bullets">
+          <li>Interests: mushrooms, thrift treasure hunts, 2010 pop</li>
+          <li>Currently obsessed with: vintage denim + weird little trinkets</li>
+          <li>My theme song: <em>click Enter</em> (because browsers are haters)</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3>Vintage Loving / Thrifting</h3>
+        <div class="thrift">
+          <div class="thriftRow"><span>Top Find:</span> <strong>Orange corduroy jacket</strong> 🍊</div>
+          <div class="thriftRow"><span>Dream Find:</span> <strong>70s velvet set</strong></div>
+          <div class="thriftRow"><span>Weakness:</span> <strong>ceramic cats</strong> (I’m trying!)</div>
+          <div class="thriftRow"><span>Thrift Tip:</span> measure your fave item + bring a tape</div>
+        </div>
+        <div class="divider"></div>
+        <p class="tiny">Leave a comment in my “guestbook” (aka open an issue on this repo 😈).</p>
+      </div>
+
+      <div class="card wide">
+        <h3>🐉 Dragon Treat Training Game</h3>
+
+        <div id="game">
+          <div class="gameStep" id="stepPickDragon">
+            <p><strong>Pick your dragon egg:</strong></p>
+            <div class="choices">
+              <button data-dragon="ember">Ember Egg</button>
+              <button data-dragon="storm">Storm Egg</button>
+              <button data-dragon="moss">Moss Egg</button>
+            </div>
+          </div>
+
+          <div class="gameStep hidden" id="stepPickTreat">
+            <p><strong>Choose a treat to train it:</strong></p>
+            <div class="choices">
+              <button data-treat="spicyJerky">Spicy Jerky</button>
+              <button data-treat="stardustBerry">Stardust Berry</button>
+              <button data-treat="marshmallow">Toasted Marshmallow</button>
+            </div>
+          </div>
+
+          <div class="gameStep hidden" id="stepResult">
+            <p id="resultText"></p>
+            <div class="choices hidden" id="rideRow">
+              <button id="rideBtn">Ride the dragon 🪽</button>
+            </div>
+            <div class="choices">
+              <button id="resetBtn">Play again</button>
+            </div>
+            <div id="sky" class="sky hidden">
+              <div id="dragon" class="dragon">🐉</div>
+              <div id="rider" class="rider">😺</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <footer class="footer">
+      <span>✨ made with glitter and GitHub Pages ✨</span>
+    </footer>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
