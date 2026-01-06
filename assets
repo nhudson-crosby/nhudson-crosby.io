@@ -1,19 +1,26 @@
 /
-  index.html
-  styles.css
-  script.js
-  assets/
-    bg-forest.jpg
-    kitty-orange.png
-    kitty-black.png
-    kitty-fluffy.png
-    mushroom1.png
-    mushroom2.png
-    music.mp3
-    album/
-      1.jpg
-      2.jpg
-      3.jpg
-    ui/
-      glitter.gif
-      cursor.png
+├── index.html
+├── styles.css
+├── script.js
+└── assets/
+    ├── cats/
+    │   ├── orange_idle.png
+    │   ├── orange_run.png
+    │   ├── orange_stretch.png
+    │   ├── black_idle.png
+    │   ├── black_run.png
+    │   ├── grey_idle.png
+    │   ├── grey_walk.png
+    │   ├── grey_sleep.png
+    │   └── grey_hiss.png
+    └── mushrooms/
+        ├── amanita.png
+        ├── balloon.png
+        ├── spiral.png
+        ├── group.png
+        ├── long.png
+        ├── basic.png
+        ├── oyster.png
+        ├── hen_of_woods.png
+        ├── elfin_saddle.png
+        └── chanterelle.png
