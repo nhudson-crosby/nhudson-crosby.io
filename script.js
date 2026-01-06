@@ -1,291 +1,469 @@
-/* -----------------------
-   ENTER OVERLAY + MUSIC
------------------------- */
-const overlay = document.getElementById("enterOverlay");
-const enterBtn = document.getElementById("enterBtn");
-const muteBtn = document.getElementById("muteBtn");
-const bgm = document.getElementById("bgm");
-const toggleMusicBtn = document.getElementById("toggleMusicBtn");
-const npText = document.getElementById("npText");
+/* =========================================================
+   Forestspace / Myspace vibes
+   styles.css (FULL FILE)
+   ========================================================= */
 
-// Just a cute label — you can change it
-const NOW_PLAYING_LABEL = "2010 pop-era vibes (your own audio file)";
+:root {
+  --panel-bg: rgba(10, 18, 14, 0.70);
+  --panel-border: rgba(160, 255, 200, 0.30);
+  --text: #eafff2;
+  --muted: rgba(234, 255, 242, 0.75);
+  --accent: #ff7bd1;
+  --accent2: #8cffc2;
+  --shadow: rgba(0, 0, 0, 0.35);
 
-function setNowPlaying() {
-  if (!npText) return;
-  npText.textContent = bgm && !bgm.paused ? NOW_PLAYING_LABEL : "—";
+  --glitter-url: url("assets/ui/glitter.gif");
+  --cursor-url: url("assets/ui/cursor.png");
 }
 
-async function enter(withSound) {
-  try {
-    if (!bgm) return;
-    bgm.muted = !withSound;
-    // play() can throw if browser blocks; we try anyway
-    await bgm.play();
-  } catch (e) {
-    // If blocked, user can click the toggle later
-  }
-  if (overlay) overlay.style.display = "none";
-  setNowPlaying();
+* { box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
 }
 
-enterBtn?.addEventListener("click", () => enter(true));
-muteBtn?.addEventListener("click", () => enter(false));
+body {
+  color: var(--text);
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
 
-toggleMusicBtn?.addEventListener("click", async () => {
-  if (!bgm) return;
-  try {
-    if (bgm.paused) {
-      bgm.muted = false;
-      await bgm.play();
-    } else {
-      bgm.pause();
-    }
-  } catch (e) {}
-  setNowPlaying();
-});
+  /* Forest background */
+  background: #06110b url("assets/bg-forest.jpg") center / cover fixed no-repeat;
 
-bgm?.addEventListener("play", setNowPlaying);
-bgm?.addEventListener("pause", setNowPlaying);
-
-/* -------------------------------
-   MUSHROOM PLACEMENT + BOBBING
--------------------------------- */
-const mushroomEls = [
-  document.getElementById("mush1"),
-  document.getElementById("mush2"),
-  document.getElementById("mush3"),
-  document.getElementById("mush4"),
-].filter(Boolean);
-
-// Lanes roughly matching your kitty lanes (% top)
-const LANES = [68, 72, 78];
-
-function rand(min, max) {
-  return Math.random() * (max - min) + min;
+  /* Myspace-ish cursor */
+  cursor: var(--cursor-url) 6 2, auto;
 }
 
-function placeMushrooms() {
-  const vw = window.innerWidth;
-
-  // distribute them across the screen with spacing
-  const xs = [
-    rand(vw * 0.18, vw * 0.30),
-    rand(vw * 0.38, vw * 0.52),
-    rand(vw * 0.58, vw * 0.72),
-    rand(vw * 0.76, vw * 0.90),
-  ].sort((a,b) => a-b);
-
-  mushroomEls.forEach((m, i) => {
-    const lane = LANES[Math.floor(Math.random() * LANES.length)];
-    m.style.left = `${xs[i % xs.length]}px`;
-    m.style.top = `${lane + rand(-2, 2)}%`;
-
-    m.classList.add("bob");
-    if (Math.random() < 0.45) m.classList.add("fast");
-  });
+/* A subtle dark overlay so text is readable */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at top, rgba(0,0,0,0.15), rgba(0,0,0,0.65));
+  pointer-events: none;
+  z-index: 0;
 }
 
-window.addEventListener("load", placeMushrooms);
-window.addEventListener("resize", placeMushrooms);
+/* =========================================================
+   Layout scaffolding
+   ========================================================= */
 
-/* ----------------------------------------
-   KITTIES: RUN + GROUP UP + HOP OVER MUSH
------------------------------------------ */
-const kittyState = [
-  { key: "orange", el: document.querySelector(".kitty.orange"), speed: 2.25, laneTopPct: 72, x: -140, dir: 1, hopCooldown: 0, groupUntil: 0 },
-  { key: "black",  el: document.querySelector(".kitty.black"),  speed: 1.85, laneTopPct: 78, x: -240, dir: 1, hopCooldown: 0, groupUntil: 0 },
-  { key: "fluffy", el: document.querySelector(".kitty.fluffy"), speed: 1.55, laneTopPct: 68, x: -340, dir: 1, hopCooldown: 0, groupUntil: 0 },
-].filter(k => k.el);
-
-function rect(el) { return el.getBoundingClientRect(); }
-
-function nearSameLane(aRect, bRect) {
-  const ay = (aRect.top + aRect.bottom) / 2;
-  const by = (bRect.top + bRect.bottom) / 2;
-  return Math.abs(ay - by) < 55;
+#app {
+  position: relative;
+  z-index: 1;
+  min-height: 100%;
+  padding: 18px;
 }
 
-function hop(kitty) {
-  if (kitty.hopCooldown > 0) return;
-  kitty.hopCooldown = 40;
-
-  kitty.el.classList.remove("hopping");
-  void kitty.el.offsetWidth; // restart animation
-  kitty.el.classList.add("hopping");
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
 }
 
-// “Group mode”: sometimes orange kitty runs near another kitty for a bit
-function maybeStartGroupMode(now) {
-  const orange = kittyState.find(k => k.key === "orange");
-  if (!orange) return;
-
-  // already in group mode?
-  if (now < orange.groupUntil) return;
-
-  // small chance to group up every ~frame
-  if (Math.random() < 0.006) {
-    const friend = kittyState.filter(k => k.key !== "orange")[Math.floor(Math.random() * 2)];
-    if (!friend) return;
-
-    // group for 4–7 seconds
-    orange.groupUntil = now + rand(4000, 7000);
-
-    // match lane and roughly match speed for the duration
-    orange.laneTopPct = friend.laneTopPct + (Math.random() < 0.5 ? -2 : 2);
-    orange.speed = friend.speed + rand(-0.2, 0.35);
-
-    // position orange near friend (behind or beside)
-    orange.x = friend.x - rand(70, 140) * friend.dir;
-    orange.dir = friend.dir;
-  } else {
-    // drift back to default lane/speed slowly if not grouping
-    orange.laneTopPct += (72 - orange.laneTopPct) * 0.02;
-    orange.speed += (2.25 - orange.speed) * 0.02;
-  }
+.title {
+  font-size: 28px;
+  letter-spacing: 0.5px;
+  text-shadow: 0 2px 12px rgba(0,0,0,0.6);
 }
 
-function tickKitties() {
-  const vw = window.innerWidth;
-  const now = performance.now();
-
-  maybeStartGroupMode(now);
-
-  for (const kitty of kittyState) {
-    // Place on lane
-    kitty.el.style.top = `${kitty.laneTopPct}%`;
-
-    // Move
-    kitty.x += kitty.speed * kitty.dir;
-
-    // Patrol/bounce edges
-    const wrapPad = 170;
-    if (kitty.dir === 1 && kitty.x > vw + wrapPad) kitty.dir = -1;
-    if (kitty.dir === -1 && kitty.x < -wrapPad) kitty.dir = 1;
-
-    // Apply position + facing
-    kitty.el.style.left = `${kitty.x}px`;
-    kitty.el.style.setProperty("--facing", kitty.dir === 1 ? 1 : -1);
-
-    if (kitty.hopCooldown > 0) kitty.hopCooldown--;
-
-    // Hop when approaching mushrooms in same lane
-    const kRect = rect(kitty.el);
-
-    for (const mush of mushroomEls) {
-      const mRect = rect(mush);
-      if (!nearSameLane(kRect, mRect)) continue;
-
-      const approaching =
-        (kitty.dir === 1 && kRect.right < mRect.left && (mRect.left - kRect.right) < 68) ||
-        (kitty.dir === -1 && kRect.left > mRect.right && (kRect.left - mRect.right) < 68);
-
-      if (approaching) hop(kitty);
-    }
-  }
-
-  requestAnimationFrame(tickKitties);
+.badges {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
 }
 
-window.addEventListener("load", () => {
-  kittyState.forEach(k => {
-    k.el.style.position = "fixed";
-    k.el.style.left = `${k.x}px`;
-  });
-  requestAnimationFrame(tickKitties);
-});
-
-/* -----------------------
-   DRAGON MINI-GAME LOGIC
------------------------- */
-let chosenDragon = null;
-
-const stepPickDragon = document.getElementById("stepPickDragon");
-const stepPickTreat = document.getElementById("stepPickTreat");
-const stepResult = document.getElementById("stepResult");
-
-const resultText = document.getElementById("resultText");
-const rideRow = document.getElementById("rideRow");
-const rideBtn = document.getElementById("rideBtn");
-const resetBtn = document.getElementById("resetBtn");
-
-const sky = document.getElementById("sky");
-const dragon = document.getElementById("dragon");
-const rider = document.getElementById("rider");
-
-document.querySelectorAll("[data-dragon]").forEach(btn => {
-  btn.addEventListener("click", () => {
-    chosenDragon = btn.dataset.dragon;
-    stepPickDragon?.classList.add("hidden");
-    stepPickTreat?.classList.remove("hidden");
-  });
-});
-
-document.querySelectorAll("[data-treat]").forEach(btn => {
-  btn.addEventListener("click", () => {
-    const treat = btn.dataset.treat;
-    const outcome = getOutcome(chosenDragon, treat);
-
-    stepPickTreat?.classList.add("hidden");
-    stepResult?.classList.remove("hidden");
-
-    rideRow?.classList.add("hidden");
-    sky?.classList.add("hidden");
-
-    if (outcome.type === "fire") {
-      resultText.textContent = `Your ${outcome.name} dragon breathes FIRE 🔥 and looks smug about it.`;
-    } else if (outcome.type === "wings") {
-      resultText.textContent = `Your ${outcome.name} dragon spreads its WINGS 🪽 — it trusts you enough to fly!`;
-      rideRow?.classList.remove("hidden");
-    } else {
-      resultText.textContent = `Your ${outcome.name} dragon BITES you 😼 (not fatal, just disrespectful).`;
-    }
-  });
-});
-
-rideBtn?.addEventListener("click", () => {
-  sky?.classList.remove("hidden");
-  startRideAnimation();
-});
-
-resetBtn?.addEventListener("click", () => {
-  chosenDragon = null;
-  stepResult?.classList.add("hidden");
-  stepPickTreat?.classList.add("hidden");
-  stepPickDragon?.classList.remove("hidden");
-  sky?.classList.add("hidden");
-});
-
-function getOutcome(dragonType, treat) {
-  const dragonName = {
-    ember: "Ember",
-    storm: "Storm",
-    moss: "Moss"
-  }[dragonType] || "Mysterious";
-
-  // Treat mapping (simple + predictable)
-  if (treat === "spicyJerky") return { type: "fire", name: dragonName };
-  if (treat === "stardustBerry") return { type: "wings", name: dragonName };
-  return { type: "bite", name: dragonName }; // marshmallow = chaotic neutral
+.badge {
+  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(0,0,0,0.35);
+  border: 1px solid rgba(255,255,255,0.12);
+  backdrop-filter: blur(8px);
 }
 
-let animId = null;
-function startRideAnimation() {
-  if (!dragon || !rider) return;
-  cancelAnimationFrame(animId);
+.grid {
+  display: grid;
+  grid-template-columns: 1.35fr 0.95fr;
+  gap: 14px;
+}
 
-  let x = 10;
-  let dir = 1;
+@media (max-width: 900px) {
+  .grid { grid-template-columns: 1fr; }
+}
 
-  function tick() {
-    x += 2.4 * dir;
-    if (x > 520) dir = -1;
-    if (x < 10) dir = 1;
+.panel {
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 18px;
+  box-shadow: 0 10px 30px var(--shadow);
+  backdrop-filter: blur(10px);
+  overflow: hidden;
+}
 
-    dragon.style.left = `${x}px`;
-    rider.style.left = `${x + 54}px`;
+.panel .panel-head {
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
 
-    animId = requestAnimationFrame(tick);
-  }
-  tick();
+.panel .panel-head h2 {
+  margin: 0;
+  font-size: 16px;
+  letter-spacing: 0.4px;
+}
+
+.panel .panel-body {
+  padding: 14px;
+}
+
+.tiny {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.35;
+}
+
+/* =========================================================
+   Buttons / inputs
+   ========================================================= */
+
+button, input, textarea {
+  font-family: inherit;
+}
+
+.btn {
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(0,0,0,0.35);
+  color: var(--text);
+  padding: 9px 12px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: transform .12s ease, filter .12s ease, border-color .12s ease;
+  box-shadow: 0 8px 18px rgba(0,0,0,0.25);
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255,123,209,0.55);
+  filter: brightness(1.06);
+}
+
+.btn.primary {
+  background: linear-gradient(135deg, rgba(255,123,209,0.28), rgba(140,255,194,0.22));
+  border-color: rgba(255,255,255,0.18);
+}
+
+.input, textarea {
+  width: 100%;
+  border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(0,0,0,0.35);
+  color: var(--text);
+  padding: 10px 12px;
+  border-radius: 12px;
+  outline: none;
+}
+
+.input:focus, textarea:focus {
+  border-color: rgba(140,255,194,0.55);
+  box-shadow: 0 0 0 3px rgba(140,255,194,0.14);
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+@media (max-width: 900px) {
+  .row { grid-template-columns: 1fr; }
+}
+
+/* =========================================================
+   Myspace glitter hover effect
+   ========================================================= */
+
+.glitter-hover {
+  position: relative;
+}
+
+.glitter-hover::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: 18px;
+  background-image: var(--glitter-url);
+  background-size: 220px 220px;
+  opacity: 0;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  filter: saturate(1.3) contrast(1.15);
+  transition: opacity 160ms ease;
+}
+
+.glitter-hover:hover::after {
+  opacity: 0.45;
+}
+
+/* =========================================================
+   Scene layer (kitties + mushrooms)
+   ========================================================= */
+
+#scene {
+  position: relative;
+  height: 440px;
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(0,0,0,0.18);
+}
+
+/* Slight vignette inside scene */
+#scene::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 40% 20%, rgba(0,0,0,0.00), rgba(0,0,0,0.35));
+  pointer-events: none;
+  z-index: 0;
+}
+
+#scene .layer {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.mushroom {
+  position: absolute;
+  width: 86px;
+  height: auto;
+  filter: drop-shadow(0 10px 10px rgba(0,0,0,0.25));
+  user-select: none;
+  pointer-events: none;
+}
+
+.mushroom.twinkle {
+  animation: twinkle 2.6s ease-in-out infinite;
+}
+
+@keyframes twinkle {
+  0%, 100% { transform: translateY(0) rotate(-1deg); filter: drop-shadow(0 10px 10px rgba(0,0,0,0.25)); }
+  50% { transform: translateY(-2px) rotate(1deg); filter: drop-shadow(0 12px 12px rgba(0,0,0,0.32)); }
+}
+
+/* =========================================================
+   KITTY SPRITE ANIMATIONS (Step 4)
+   ========================================================= */
+
+.kitty {
+  position: absolute;
+  width: 96px;
+  height: 96px;
+  pointer-events: none;
+  user-select: none;
+  filter: drop-shadow(0 12px 10px rgba(0,0,0,0.35));
+  transform-origin: 50% 80%;
+}
+
+/* Facing direction via CSS variable (1 or -1) */
+.kitty {
+  transform: scaleX(var(--facing, 1));
+}
+
+/* RUN / WALK cycles: 8 frames => 800% width background */
+.kitty.orange.run {
+  background: url("assets/cats/orange_run.png") 0 0 / 800% 100% no-repeat;
+  animation: run 700ms steps(8) infinite;
+}
+
+.kitty.black.run {
+  background: url("assets/cats/black_run.png") 0 0 / 800% 100% no-repeat;
+  animation: run 620ms steps(8) infinite;
+}
+
+.kitty.grey.walk {
+  background: url("assets/cats/grey_walk.png") 0 0 / 800% 100% no-repeat;
+  animation: walk 1000ms steps(8) infinite;
+}
+
+/* IDLES / SPECIAL */
+.kitty.orange.idle {
+  background: url("assets/cats/orange_stretch.png") 0 0 / 800% 100% no-repeat;
+  animation: idle 1200ms steps(8) infinite;
+}
+
+.kitty.black.idle {
+  background: url("assets/cats/black_idle.png") center / contain no-repeat;
+  animation: kittyBob 520ms ease-in-out infinite;
+}
+
+.kitty.grey.idle {
+  background: url("assets/cats/grey_idle.png") center / contain no-repeat;
+  animation: kittyBob 900ms ease-in-out infinite;
+}
+
+.kitty.grey.sleep {
+  background: url("assets/cats/grey_sleep.png") 0 0 / 800% 100% no-repeat;
+  animation: sleep 1400ms steps(8) infinite;
+}
+
+.kitty.grey.hiss {
+  background: url("assets/cats/grey_hiss.png") 0 0 / 800% 100% no-repeat;
+  animation: hiss 800ms steps(8) infinite;
+}
+
+/* Hop overlay */
+.kitty.hop {
+  animation-name: hopBob, run;
+  animation-duration: 240ms, 700ms;
+  animation-iteration-count: 1, infinite;
+  animation-timing-function: ease-out, steps(8);
+}
+
+@keyframes run   { to { background-position: 100% 0; } }
+@keyframes walk  { to { background-position: 100% 0; } }
+@keyframes idle  { to { background-position: 100% 0; } }
+@keyframes sleep { to { background-position: 100% 0; } }
+@keyframes hiss  { to { background-position: 100% 0; } }
+
+@keyframes kittyBob {
+  0%   { translate: 0 0; }
+  50%  { translate: 0 -2px; }
+  100% { translate: 0 0; }
+}
+
+@keyframes hopBob {
+  0%   { translate: 0 0; }
+  60%  { translate: 0 -18px; }
+  100% { translate: 0 0; }
+}
+
+/* =========================================================
+   Lists
+   ========================================================= */
+
+ul.clean {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+ul.clean li {
+  padding: 10px 10px;
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 14px;
+  background: rgba(0,0,0,0.28);
+  margin-bottom: 10px;
+}
+
+.meta {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* =========================================================
+   Album modal
+   ========================================================= */
+
+#albumModal {
+  position: fixed;
+  inset: 0;
+  display: none;
+  z-index: 999;
+}
+
+#albumModal.active {
+  display: block;
+}
+
+#albumModal .backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.65);
+}
+
+#albumModal .modal {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(900px, calc(100% - 30px));
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.14);
+  background: rgba(10, 18, 14, 0.88);
+  box-shadow: 0 18px 70px rgba(0,0,0,0.55);
+}
+
+#albumModal .modal-head {
+  padding: 12px 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+#albumModal img.viewer {
+  width: 100%;
+  height: 460px;
+  object-fit: contain;
+  display: block;
+  background: rgba(0,0,0,0.35);
+}
+
+#albumModal .modal-foot {
+  padding: 12px 14px;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+}
+
+.caption {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* =========================================================
+   Music gate overlay (optional)
+   ========================================================= */
+
+#musicGate {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: none;
+}
+
+#musicGate.active {
+  display: grid;
+  place-items: center;
+}
+
+#musicGate .gate {
+  width: min(560px, calc(100% - 28px));
+  padding: 16px;
+  border-radius: 18px;
+  background: rgba(10, 18, 14, 0.92);
+  border: 1px solid rgba(255,255,255,0.14);
+  box-shadow: 0 18px 70px rgba(0,0,0,0.55);
+}
+
+#musicGate .gate h3 {
+  margin: 0 0 8px 0;
+}
+
+#musicGate .gate p {
+  margin: 0 0 12px 0;
+  color: var(--muted);
+  line-height: 1.35;
 }
