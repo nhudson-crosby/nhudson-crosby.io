@@ -2,77 +2,178 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Nikita’s Forestspace</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
 
-  <!-- ENTER OVERLAY (solves autoplay restrictions) -->
+  <!-- ENTER OVERLAY (required for audio in modern browsers) -->
   <div id="enterOverlay" class="overlay">
     <div class="overlayCard">
+      <div class="blinkiesRow">
+        <span class="blinkie">★ forestspace ★</span>
+        <span class="blinkie alt">ONLINE</span>
+        <span class="blinkie">2010 MODE</span>
+      </div>
+
       <h1>🌲 Enter the Forest 🌲</h1>
-      <p>2010 vibes only. Click to begin (music + kitties).</p>
-      <button id="enterBtn">Enter ✨</button>
-      <p class="tiny">(If audio doesn’t start, your browser is protecting you. Click again.)</p>
+      <p class="tiny">
+        Click to enter (music + kitties + glitter).
+      </p>
+
+      <div class="enterActions">
+        <button id="enterBtn">Enter ✨</button>
+        <button id="muteBtn" class="secondary" title="Enter with music muted">Enter (Muted)</button>
+      </div>
+
+      <p class="tiny">
+        Tip: Autoplay is blocked unless you click. This click is the ritual.
+      </p>
     </div>
   </div>
 
-  <!-- AUDIO: use YOUR OWN file or embed player. Don’t upload copyrighted tracks. -->
-  <audio id="bgm" preload="auto" loop>
-    <!-- Replace with your own licensed audio file -->
-    <source src="assets/music/your-2010-pop-vibes.mp3" type="audio/mpeg">
+  <!-- BACKGROUND MUSIC (use your own licensed audio) -->
+  <audio id="bgm" loop preload="auto">
+    <!-- Put a file at /assets/music.mp3 (your own / licensed) -->
+    <source src="assets/music.mp3" type="audio/mpeg">
   </audio>
 
-  <!-- LAYERS -->
+  <!-- BACKGROUND -->
   <div class="bgLayer"></div>
   <div class="parallaxLayer"></div>
 
-  <!-- KITTIES -->
-  <img class="sprite kitty orange" src="assets/kitty-orange.png" alt="orange kitty" />
-  <img class="sprite kitty black" src="assets/kitty-black.png" alt="black kitty" />
-  <img class="sprite kitty fluffy" src="assets/kitty-fluffy.png" alt="fluffy kitty" />
+  <!-- SPRITES -->
+  <img class="sprite kitty orange" src="assets/kitty-orange.png" alt="orange kitty">
+  <img class="sprite kitty black" src="assets/kitty-black.png" alt="black kitty">
+  <img class="sprite kitty fluffy" src="assets/kitty-fluffy.png" alt="fluffy kitty">
 
-  <!-- PAGE CONTENT -->
+  <!-- MUSHROOM OBSTACLES (positioned by JS on load) -->
+  <img id="mush1" class="sprite mushroom" src="assets/mushroom1.png" alt="mushroom">
+  <img id="mush2" class="sprite mushroom" src="assets/mushroom2.png" alt="mushroom">
+  <img id="mush3" class="sprite mushroom" src="assets/mushroom1.png" alt="mushroom">
+  <img id="mush4" class="sprite mushroom" src="assets/mushroom2.png" alt="mushroom">
+
   <main class="container">
+
     <header class="profileHeader">
-      <div class="badge">✨ ONLINE NOW ✨</div>
+      <div class="headerTop">
+        <span class="badge">✨ ONLINE NOW ✨</span>
+        <div class="nowPlaying">
+          <span class="npLabel">Now Playing:</span>
+          <span id="npText" class="npText">—</span>
+          <button id="toggleMusicBtn" class="miniBtn" title="Toggle music">♫</button>
+        </div>
+      </div>
+
       <h2>Nikita’s Forestspace</h2>
-      <div class="status">Status: “in my mushroom era 🍄”</div>
+      <p class="status">
+        status: <span class="sparkle">in my mushroom era 🍄</span>
+      </p>
+
+      <div class="marqueeWrap">
+        <div class="marquee">
+          ✨ welcome to my forest ✨ thrift queen corner ✨ choose a dragon ✨ don’t step on the mushrooms ✨
+        </div>
+      </div>
     </header>
 
     <section class="grid">
+
+      <!-- LEFT COLUMN -->
       <div class="card">
         <h3>About Me</h3>
         <p>
-          Welcome to my enchanted forest profile. If you see the orange kitty,
-          that’s me sprinting between boulders like I forgot I left the oven on.
+          Welcome to my enchanted forest profile. If you see the orange kitty sprinting between trees,
+          that’s me. The black kitty is the chaos friend. The fluffy kitty is the wise, cranky, elder.
         </p>
-        <ul class="bullets">
-          <li>Interests: mushrooms, thrift treasure hunts, 2010 pop</li>
-          <li>Currently obsessed with: vintage denim + weird little trinkets</li>
-          <li>My theme song: <em>click Enter</em> (because browsers are haters)</li>
-        </ul>
+
+        <div class="divider"></div>
+
+        <div class="profileFacts">
+          <div class="factRow"><span>Interests:</span> mushrooms, vintage, cozy chaos</div>
+          <div class="factRow"><span>Vibe:</span> 2010 pop + glitter + woodland creature</div>
+          <div class="factRow"><span>Current quest:</span> thrift treasure hunting</div>
+        </div>
+
+        <div class="divider"></div>
+
+        <p class="tiny">
+          Leave a note in my “Guestbook”: open an Issue on this repo (very 2026 Myspace).
+        </p>
+        <p class="tiny">
+          <a href="#" onclick="alert('Guestbook idea: enable Issues in your repo and link them here!')">[ Guestbook / Comments ]</a>
+        </p>
       </div>
 
       <div class="card">
-        <h3>Vintage Loving / Thrifting</h3>
-        <div class="thrift">
-          <div class="thriftRow"><span>Top Find:</span> <strong>Orange corduroy jacket</strong> 🍊</div>
-          <div class="thriftRow"><span>Dream Find:</span> <strong>70s velvet set</strong></div>
-          <div class="thriftRow"><span>Weakness:</span> <strong>ceramic cats</strong> (I’m trying!)</div>
-          <div class="thriftRow"><span>Thrift Tip:</span> measure your fave item + bring a tape</div>
+        <h3>Blinkies + Links</h3>
+
+        <div class="blinkiesGrid">
+          <span class="blinkie">GLITTER</span>
+          <span class="blinkie alt">THRIFT</span>
+          <span class="blinkie">MUSHROOMS</span>
+          <span class="blinkie alt">KITTIES</span>
+          <span class="blinkie">DRAGONS</span>
+          <span class="blinkie alt">2000s</span>
         </div>
+
         <div class="divider"></div>
-        <p class="tiny">Leave a comment in my “guestbook” (aka open an issue on this repo 😈).</p>
+
+        <ul class="linkList">
+          <li><a href="#thrift">★ Thrift Corner</a></li>
+          <li><a href="#game">★ Dragon Treat Game</a></li>
+          <li><a href="#top8">★ Top 8 Thrift Finds</a></li>
+          <li><a href="#" onclick="alert('Add your socials here when ready ✨')">★ My Socials</a></li>
+        </ul>
+
+        <div class="divider"></div>
+
+        <p class="tiny">
+          Pro tip: hover over everything. The glitter is aggressive.
+        </p>
       </div>
 
-      <div class="card wide">
-        <h3>🐉 Dragon Treat Training Game</h3>
+      <!-- THRIFT MODULE (FULLER) -->
+      <div class="card wide" id="thrift">
+        <h3>🧥 Vintage Loving / Thrifting</h3>
 
-        <div id="game">
+        <div class="thriftGrid">
+          <div class="thriftRow"><span>Top Find:</span> <strong>orange corduroy jacket</strong> 🍊</div>
+          <div class="thriftRow"><span>Dream Find:</span> <strong>70s velvet set</strong></div>
+          <div class="thriftRow"><span>Weakness:</span> <strong>ceramic cats</strong> (I’m trying)</div>
+          <div class="thriftRow"><span>Thrift Tip:</span> measure your fave item + bring a tape</div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="top8" id="top8">
+          <h4>Top 8 Thrift Finds</h4>
+          <div class="top8Grid">
+            <div class="top8Card">1) velvet blazer</div>
+            <div class="top8Card">2) weird little trinket box</div>
+            <div class="top8Card">3) vintage band tee</div>
+            <div class="top8Card">4) lacy slip dress</div>
+            <div class="top8Card">5) denim maxi skirt</div>
+            <div class="top8Card">6) chunky knit</div>
+            <div class="top8Card">7) antique-looking mirror</div>
+            <div class="top8Card">8) retro handbag</div>
+          </div>
+
+          <p class="tiny">
+            Want this to be editable? I can add a little “Add a find” form that saves to localStorage.
+          </p>
+        </div>
+      </div>
+
+      <!-- DRAGON GAME -->
+      <div class="card wide" id="game">
+        <h3>🐉 Dragon Treat Training Game</h3>
+        <p class="tiny">Pick an egg. Feed treats. Your choices decide if your dragon breathes fire, grows wings, or bites you (rude).</p>
+
+        <div class="gameWrap">
           <div class="gameStep" id="stepPickDragon">
-            <p><strong>Pick your dragon egg:</strong></p>
+            <p><strong>Step 1:</strong> Choose a dragon egg</p>
             <div class="choices">
               <button data-dragon="ember">Ember Egg</button>
               <button data-dragon="storm">Storm Egg</button>
@@ -81,7 +182,7 @@
           </div>
 
           <div class="gameStep hidden" id="stepPickTreat">
-            <p><strong>Choose a treat to train it:</strong></p>
+            <p><strong>Step 2:</strong> Choose a treat</p>
             <div class="choices">
               <button data-treat="spicyJerky">Spicy Jerky</button>
               <button data-treat="stardustBerry">Stardust Berry</button>
@@ -90,25 +191,29 @@
           </div>
 
           <div class="gameStep hidden" id="stepResult">
-            <p id="resultText"></p>
+            <p id="resultText" class="resultText"></p>
+
             <div class="choices hidden" id="rideRow">
               <button id="rideBtn">Ride the dragon 🪽</button>
             </div>
+
             <div class="choices">
-              <button id="resetBtn">Play again</button>
+              <button id="resetBtn" class="secondary">Play again</button>
             </div>
+
             <div id="sky" class="sky hidden">
               <div id="dragon" class="dragon">🐉</div>
               <div id="rider" class="rider">😺</div>
+              <div class="sparkTrail"></div>
             </div>
           </div>
         </div>
-
       </div>
+
     </section>
 
     <footer class="footer">
-      <span>✨ made with glitter and GitHub Pages ✨</span>
+      ✨ made with glitter + GitHub Pages ✨
     </footer>
   </main>
 
