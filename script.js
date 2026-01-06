@@ -1,469 +1,357 @@
 /* =========================================================
-   Forestspace / Myspace vibes
-   styles.css (FULL FILE)
+   Forestspace script.js
+   - Renders forest scene (kitties + mushrooms)
+   - Mushroom collision avoidance + hopping
+   - Dragon treat game wired to dragon PNGs
    ========================================================= */
 
-:root {
-  --panel-bg: rgba(10, 18, 14, 0.70);
-  --panel-border: rgba(160, 255, 200, 0.30);
-  --text: #eafff2;
-  --muted: rgba(234, 255, 242, 0.75);
-  --accent: #ff7bd1;
-  --accent2: #8cffc2;
-  --shadow: rgba(0, 0, 0, 0.35);
+/* ---------------------------
+   ASSET PATHS
+---------------------------- */
 
-  --glitter-url: url("assets/ui/glitter.gif");
-  --cursor-url: url("assets/ui/cursor.png");
-}
+const DRAGON_IMAGES = {
+  ember: "assets/dragons/ember.png",
+  storm: "assets/dragons/storm.png",
+  moss: "assets/dragons/moss.png",
+};
 
-* { box-sizing: border-box; }
+const MUSHROOMS = [
+  "assets/mushrooms/amanita.png",
+  "assets/mushrooms/balloon.png",
+  "assets/mushrooms/spiral.png",
+  "assets/mushrooms/group.png",
+  "assets/mushrooms/long.png",
+  "assets/mushrooms/basic.png",
+  "assets/mushrooms/oyster.png",
+  "assets/mushrooms/hen_of_woods.png",
+  "assets/mushrooms/elfin_saddle.png",
+  "assets/mushrooms/chanterelle.png",
+];
 
-html, body {
-  height: 100%;
-  margin: 0;
-  padding: 0;
-}
+/* ---------------------------
+   Helpers
+---------------------------- */
 
-body {
-  color: var(--text);
-  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+function clamp(n, a, b) { return Math.max(a, Math.min(b, n)); }
+function rand(a, b) { return a + Math.random() * (b - a); }
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 
-  /* Forest background */
-  background: #06110b url("assets/bg-forest.jpg") center / cover fixed no-repeat;
-
-  /* Myspace-ish cursor */
-  cursor: var(--cursor-url) 6 2, auto;
-}
-
-/* A subtle dark overlay so text is readable */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  background: radial-gradient(circle at top, rgba(0,0,0,0.15), rgba(0,0,0,0.65));
-  pointer-events: none;
-  z-index: 0;
+function rectsOverlap(a, b) {
+  return !(
+    a.x + a.w < b.x ||
+    a.x > b.x + b.w ||
+    a.y + a.h < b.y ||
+    a.y > b.y + b.h
+  );
 }
 
 /* =========================================================
-   Layout scaffolding
+   (1) DRAGON GAME: show your dragon images
    ========================================================= */
 
-#app {
-  position: relative;
-  z-index: 1;
-  min-height: 100%;
-  padding: 18px;
-}
+function wireDragonGame() {
+  const stepPickDragon = document.getElementById("stepPickDragon");
+  const stepPickTreat = document.getElementById("stepPickTreat");
+  const stepResult = document.getElementById("stepResult");
 
-.header {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 14px;
-}
+  const resultText = document.getElementById("resultText");
+  const rideRow = document.getElementById("rideRow");
+  const rideBtn = document.getElementById("rideBtn");
+  const resetBtn = document.getElementById("resetBtn");
 
-.title {
-  font-size: 28px;
-  letter-spacing: 0.5px;
-  text-shadow: 0 2px 12px rgba(0,0,0,0.6);
-}
+  const sky = document.getElementById("sky");
+  const dragonEmoji = document.getElementById("dragon");
 
-.badges {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  align-items: center;
-}
+  if (!stepPickDragon || !stepPickTreat || !stepResult) return;
 
-.badge {
-  font-size: 12px;
-  padding: 6px 10px;
-  border-radius: 999px;
-  background: rgba(0,0,0,0.35);
-  border: 1px solid rgba(255,255,255,0.12);
-  backdrop-filter: blur(8px);
-}
+  // Add an <img> for the dragon sticker into the result step (once)
+  let dragonSticker = document.getElementById("dragonSticker");
+  if (!dragonSticker) {
+    dragonSticker = document.createElement("img");
+    dragonSticker.id = "dragonSticker";
+    dragonSticker.alt = "Your dragon";
+    dragonSticker.style.width = "180px";
+    dragonSticker.style.maxWidth = "45vw";
+    dragonSticker.style.display = "block";
+    dragonSticker.style.margin = "10px 0 8px";
+    dragonSticker.style.filter = "drop-shadow(0 12px 20px rgba(0,0,0,0.35))";
+    // Put it above the result text
+    stepResult.insertBefore(dragonSticker, resultText);
+  }
 
-.grid {
-  display: grid;
-  grid-template-columns: 1.35fr 0.95fr;
-  gap: 14px;
-}
+  let chosenDragon = null;
+  let chosenTreat = null;
 
-@media (max-width: 900px) {
-  .grid { grid-template-columns: 1fr; }
-}
+  function show(el) { el.classList.remove("hidden"); }
+  function hide(el) { el.classList.add("hidden"); }
 
-.panel {
-  background: var(--panel-bg);
-  border: 1px solid var(--panel-border);
-  border-radius: 18px;
-  box-shadow: 0 10px 30px var(--shadow);
-  backdrop-filter: blur(10px);
-  overflow: hidden;
-}
+  function reset() {
+    chosenDragon = null;
+    chosenTreat = null;
+    hide(stepPickTreat);
+    hide(stepResult);
+    show(stepPickDragon);
+    hide(rideRow);
+    hide(sky);
+    resultText.textContent = "";
+    dragonSticker.src = "";
+    dragonEmoji.textContent = "🐉";
+  }
 
-.panel .panel-head {
-  padding: 12px 14px;
-  border-bottom: 1px solid rgba(255,255,255,0.08);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-}
+  // Step 1: pick dragon egg
+  stepPickDragon.querySelectorAll("button[data-dragon]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      chosenDragon = btn.dataset.dragon;
 
-.panel .panel-head h2 {
-  margin: 0;
-  font-size: 16px;
-  letter-spacing: 0.4px;
-}
+      hide(stepPickDragon);
+      show(stepPickTreat);
+    });
+  });
 
-.panel .panel-body {
-  padding: 14px;
-}
+  // Step 2: pick treat => outcome
+  stepPickTreat.querySelectorAll("button[data-treat]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      chosenTreat = btn.dataset.treat;
 
-.tiny {
-  font-size: 12px;
-  color: var(--muted);
-  line-height: 1.35;
+      hide(stepPickTreat);
+      show(stepResult);
+
+      // show sticker
+      dragonSticker.src = DRAGON_IMAGES[chosenDragon] || "";
+
+      // outcome rules (simple + fun; tweak anytime)
+      let outcome = "bite";
+      if (chosenDragon === "ember" && chosenTreat === "spicyJerky") outcome = "fire";
+      if (chosenDragon === "storm" && chosenTreat === "stardustBerry") outcome = "wings";
+      if (chosenDragon === "moss" && chosenTreat === "marshmallow") outcome = "wings";
+
+      // Also allow a little randomness so it feels alive
+      if (chosenTreat === "stardustBerry" && Math.random() < 0.15) outcome = "wings";
+      if (chosenTreat === "spicyJerky" && Math.random() < 0.12) outcome = "fire";
+
+      if (outcome === "fire") {
+        resultText.textContent = `🔥 Your ${chosenDragon} dragon loves that treat… and breathes FIRE. Respect.`;
+        hide(rideRow);
+        hide(sky);
+      } else if (outcome === "wings") {
+        resultText.textContent = `🪽 Your ${chosenDragon} dragon grows wings!! You can ride it into the glittery sky.`;
+        show(rideRow);
+      } else {
+        resultText.textContent = `😾 Your ${chosenDragon} dragon bites you. Not hard. Just… disrespectfully.`;
+        hide(rideRow);
+        hide(sky);
+      }
+    });
+  });
+
+  rideBtn?.addEventListener("click", () => {
+    show(sky);
+    // swap emoji “dragon” to a vibe; sticker stays above
+    dragonEmoji.textContent = "🐉✨🪽";
+  });
+
+  resetBtn?.addEventListener("click", reset);
+
+  reset();
 }
 
 /* =========================================================
-   Buttons / inputs
+   (2) + (3) FOREST SCENE: render + collision/hopping
    ========================================================= */
 
-button, input, textarea {
-  font-family: inherit;
+const sceneState = {
+  w: 0,
+  h: 0,
+  mushrooms: [],
+  cats: [],
+  lastT: 0,
+};
+
+// lanes inside the scene
+const LANES = [300, 330, 360];
+
+function measureScene(scene) {
+  sceneState.w = scene.clientWidth;
+  sceneState.h = scene.clientHeight;
 }
 
-.btn {
-  border: 1px solid rgba(255,255,255,0.12);
-  background: rgba(0,0,0,0.35);
-  color: var(--text);
-  padding: 9px 12px;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: transform .12s ease, filter .12s ease, border-color .12s ease;
-  box-shadow: 0 8px 18px rgba(0,0,0,0.25);
+function spawnMushrooms(layer) {
+  // clear old
+  for (const m of sceneState.mushrooms) m.el.remove();
+  sceneState.mushrooms = [];
+
+  const count = 14;
+  const pad = 40;
+
+  for (let i = 0; i < count; i++) {
+    const img = document.createElement("img");
+    img.className = "mushroom";
+    img.src = pick(MUSHROOMS);
+    img.alt = "mushroom";
+
+    const size = rand(58, 110);
+    img.style.width = `${size}px`;
+
+    const laneY = pick(LANES);
+    const x = rand(pad, Math.max(pad + 1, sceneState.w - pad - size));
+    const y = clamp(laneY + rand(-18, 22), 50, sceneState.h - 130);
+
+    img.style.left = `${x}px`;
+    img.style.top = `${y}px`;
+
+    layer.appendChild(img);
+
+    // collision bbox (tuned)
+    const bbox = {
+      x,
+      y,
+      w: size * 0.62,
+      h: size * 0.48,
+      ox: size * 0.18,
+      oy: size * 0.40,
+    };
+
+    sceneState.mushrooms.push({ el: img, bbox });
+  }
 }
 
-.btn:hover {
-  transform: translateY(-1px);
-  border-color: rgba(255,123,209,0.55);
-  filter: brightness(1.06);
+function createCat(layer, type, laneIndex, x) {
+  const el = document.createElement("div");
+  el.className = `kitty ${type} ${type === "grey" ? "walk" : "run"}`;
+  layer.appendChild(el);
+
+  const cat = {
+    type,
+    el,
+    x,
+    laneIndex,
+    y: LANES[laneIndex],
+    vx:
+      type === "grey" ? rand(25, 45) :
+      type === "orange" ? rand(55, 85) :
+      rand(70, 105),
+    hopUntil: 0,
+  };
+
+  // random direction
+  if (Math.random() < 0.5) cat.vx *= -1;
+
+  sceneState.cats.push(cat);
+  placeCat(cat);
+  return cat;
 }
 
-.btn.primary {
-  background: linear-gradient(135deg, rgba(255,123,209,0.28), rgba(140,255,194,0.22));
-  border-color: rgba(255,255,255,0.18);
+function placeCat(cat) {
+  cat.el.style.left = `${cat.x}px`;
+  cat.el.style.top = `${cat.y}px`;
+  cat.el.style.setProperty("--facing", cat.vx >= 0 ? 1 : -1);
 }
 
-.input, textarea {
-  width: 100%;
-  border: 1px solid rgba(255,255,255,0.15);
-  background: rgba(0,0,0,0.35);
-  color: var(--text);
-  padding: 10px 12px;
-  border-radius: 12px;
-  outline: none;
+function catRect(cat) {
+  return { x: cat.x + 18, y: cat.y + 46, w: 60, h: 34 };
 }
 
-.input:focus, textarea:focus {
-  border-color: rgba(140,255,194,0.55);
-  box-shadow: 0 0 0 3px rgba(140,255,194,0.14);
+function shouldHop(cat, obstacleRect) {
+  const cr = catRect(cat);
+  const forward = cat.vx >= 0;
+  const dx = forward
+    ? (obstacleRect.x - (cr.x + cr.w))
+    : (cr.x - (obstacleRect.x + obstacleRect.w));
+  const aligned = Math.abs((obstacleRect.y + obstacleRect.h / 2) - (cr.y + cr.h / 2)) < 30;
+  return aligned && dx >= -6 && dx < 42;
 }
 
-.row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
+function hop(cat) {
+  const t = performance.now();
+  cat.hopUntil = t + 240;
+  cat.el.classList.add("hop");
+  setTimeout(() => cat.el.classList.remove("hop"), 260);
 }
 
-@media (max-width: 900px) {
-  .row { grid-template-columns: 1fr; }
+function avoidMushrooms(cat) {
+  const cr = catRect(cat);
+
+  for (const m of sceneState.mushrooms) {
+    const r = {
+      x: m.bbox.x + m.bbox.ox,
+      y: m.bbox.y + m.bbox.oy,
+      w: m.bbox.w,
+      h: m.bbox.h,
+    };
+
+    if (rectsOverlap(cr, r) || shouldHop(cat, r)) {
+      // 70% hop, 30% lane change
+      if (Math.random() < 0.7) {
+        if (performance.now() > cat.hopUntil) hop(cat);
+      } else {
+        const dir = Math.random() < 0.5 ? -1 : 1;
+        cat.laneIndex = (cat.laneIndex + dir + LANES.length) % LANES.length;
+        cat.y = LANES[cat.laneIndex];
+      }
+      break;
+    }
+  }
+}
+
+function tickScene(scene) {
+  if (!sceneState.lastT) sceneState.lastT = performance.now();
+  const t = performance.now();
+  const dt = (t - sceneState.lastT) / 1000;
+  sceneState.lastT = t;
+
+  for (const cat of sceneState.cats) {
+    avoidMushrooms(cat);
+
+    // move
+    cat.x += cat.vx * dt;
+
+    // bounce at edges
+    const minX = -60;
+    const maxX = sceneState.w + 60;
+
+    if (cat.x < minX) {
+      cat.x = minX;
+      cat.vx = Math.abs(cat.vx);
+    } else if (cat.x > maxX) {
+      cat.x = maxX;
+      cat.vx = -Math.abs(cat.vx);
+    }
+
+    placeCat(cat);
+  }
+
+  requestAnimationFrame(() => tickScene(scene));
+}
+
+function initForestScene() {
+  const scene = document.getElementById("scene");
+  const layer = document.getElementById("sceneLayer");
+  if (!scene || !layer) return;
+
+  measureScene(scene);
+  spawnMushrooms(layer);
+
+  // Create kitties (3)
+  if (sceneState.cats.length === 0) {
+    createCat(layer, "orange", 1, 60);
+    createCat(layer, "black", 0, 190);
+    createCat(layer, "grey", 2, 330);
+  }
+
+  // respawn mushrooms on resize (simple)
+  window.addEventListener("resize", () => {
+    measureScene(scene);
+    spawnMushrooms(layer);
+  });
+
+  tickScene(scene);
 }
 
 /* =========================================================
-   Myspace glitter hover effect
+   Boot
    ========================================================= */
 
-.glitter-hover {
-  position: relative;
-}
-
-.glitter-hover::after {
-  content: "";
-  position: absolute;
-  inset: -6px;
-  border-radius: 18px;
-  background-image: var(--glitter-url);
-  background-size: 220px 220px;
-  opacity: 0;
-  pointer-events: none;
-  mix-blend-mode: screen;
-  filter: saturate(1.3) contrast(1.15);
-  transition: opacity 160ms ease;
-}
-
-.glitter-hover:hover::after {
-  opacity: 0.45;
-}
-
-/* =========================================================
-   Scene layer (kitties + mushrooms)
-   ========================================================= */
-
-#scene {
-  position: relative;
-  height: 440px;
-  border-radius: 18px;
-  overflow: hidden;
-  border: 1px solid rgba(255,255,255,0.10);
-  background: rgba(0,0,0,0.18);
-}
-
-/* Slight vignette inside scene */
-#scene::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle at 40% 20%, rgba(0,0,0,0.00), rgba(0,0,0,0.35));
-  pointer-events: none;
-  z-index: 0;
-}
-
-#scene .layer {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-}
-
-.mushroom {
-  position: absolute;
-  width: 86px;
-  height: auto;
-  filter: drop-shadow(0 10px 10px rgba(0,0,0,0.25));
-  user-select: none;
-  pointer-events: none;
-}
-
-.mushroom.twinkle {
-  animation: twinkle 2.6s ease-in-out infinite;
-}
-
-@keyframes twinkle {
-  0%, 100% { transform: translateY(0) rotate(-1deg); filter: drop-shadow(0 10px 10px rgba(0,0,0,0.25)); }
-  50% { transform: translateY(-2px) rotate(1deg); filter: drop-shadow(0 12px 12px rgba(0,0,0,0.32)); }
-}
-
-/* =========================================================
-   KITTY SPRITE ANIMATIONS (Step 4)
-   ========================================================= */
-
-.kitty {
-  position: absolute;
-  width: 96px;
-  height: 96px;
-  pointer-events: none;
-  user-select: none;
-  filter: drop-shadow(0 12px 10px rgba(0,0,0,0.35));
-  transform-origin: 50% 80%;
-}
-
-/* Facing direction via CSS variable (1 or -1) */
-.kitty {
-  transform: scaleX(var(--facing, 1));
-}
-
-/* RUN / WALK cycles: 8 frames => 800% width background */
-.kitty.orange.run {
-  background: url("assets/cats/orange_run.png") 0 0 / 800% 100% no-repeat;
-  animation: run 700ms steps(8) infinite;
-}
-
-.kitty.black.run {
-  background: url("assets/cats/black_run.png") 0 0 / 800% 100% no-repeat;
-  animation: run 620ms steps(8) infinite;
-}
-
-.kitty.grey.walk {
-  background: url("assets/cats/grey_walk.png") 0 0 / 800% 100% no-repeat;
-  animation: walk 1000ms steps(8) infinite;
-}
-
-/* IDLES / SPECIAL */
-.kitty.orange.idle {
-  background: url("assets/cats/orange_stretch.png") 0 0 / 800% 100% no-repeat;
-  animation: idle 1200ms steps(8) infinite;
-}
-
-.kitty.black.idle {
-  background: url("assets/cats/black_idle.png") center / contain no-repeat;
-  animation: kittyBob 520ms ease-in-out infinite;
-}
-
-.kitty.grey.idle {
-  background: url("assets/cats/grey_idle.png") center / contain no-repeat;
-  animation: kittyBob 900ms ease-in-out infinite;
-}
-
-.kitty.grey.sleep {
-  background: url("assets/cats/grey_sleep.png") 0 0 / 800% 100% no-repeat;
-  animation: sleep 1400ms steps(8) infinite;
-}
-
-.kitty.grey.hiss {
-  background: url("assets/cats/grey_hiss.png") 0 0 / 800% 100% no-repeat;
-  animation: hiss 800ms steps(8) infinite;
-}
-
-/* Hop overlay */
-.kitty.hop {
-  animation-name: hopBob, run;
-  animation-duration: 240ms, 700ms;
-  animation-iteration-count: 1, infinite;
-  animation-timing-function: ease-out, steps(8);
-}
-
-@keyframes run   { to { background-position: 100% 0; } }
-@keyframes walk  { to { background-position: 100% 0; } }
-@keyframes idle  { to { background-position: 100% 0; } }
-@keyframes sleep { to { background-position: 100% 0; } }
-@keyframes hiss  { to { background-position: 100% 0; } }
-
-@keyframes kittyBob {
-  0%   { translate: 0 0; }
-  50%  { translate: 0 -2px; }
-  100% { translate: 0 0; }
-}
-
-@keyframes hopBob {
-  0%   { translate: 0 0; }
-  60%  { translate: 0 -18px; }
-  100% { translate: 0 0; }
-}
-
-/* =========================================================
-   Lists
-   ========================================================= */
-
-ul.clean {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-ul.clean li {
-  padding: 10px 10px;
-  border: 1px solid rgba(255,255,255,0.10);
-  border-radius: 14px;
-  background: rgba(0,0,0,0.28);
-  margin-bottom: 10px;
-}
-
-.meta {
-  font-size: 12px;
-  color: var(--muted);
-}
-
-/* =========================================================
-   Album modal
-   ========================================================= */
-
-#albumModal {
-  position: fixed;
-  inset: 0;
-  display: none;
-  z-index: 999;
-}
-
-#albumModal.active {
-  display: block;
-}
-
-#albumModal .backdrop {
-  position: absolute;
-  inset: 0;
-  background: rgba(0,0,0,0.65);
-}
-
-#albumModal .modal {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: min(900px, calc(100% - 30px));
-  border-radius: 18px;
-  overflow: hidden;
-  border: 1px solid rgba(255,255,255,0.14);
-  background: rgba(10, 18, 14, 0.88);
-  box-shadow: 0 18px 70px rgba(0,0,0,0.55);
-}
-
-#albumModal .modal-head {
-  padding: 12px 14px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 10px;
-  border-bottom: 1px solid rgba(255,255,255,0.08);
-}
-
-#albumModal img.viewer {
-  width: 100%;
-  height: 460px;
-  object-fit: contain;
-  display: block;
-  background: rgba(0,0,0,0.35);
-}
-
-#albumModal .modal-foot {
-  padding: 12px 14px;
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-  align-items: center;
-}
-
-.caption {
-  font-size: 13px;
-  color: var(--muted);
-}
-
-/* =========================================================
-   Music gate overlay (optional)
-   ========================================================= */
-
-#musicGate {
-  position: fixed;
-  inset: 0;
-  z-index: 1000;
-  display: none;
-}
-
-#musicGate.active {
-  display: grid;
-  place-items: center;
-}
-
-#musicGate .gate {
-  width: min(560px, calc(100% - 28px));
-  padding: 16px;
-  border-radius: 18px;
-  background: rgba(10, 18, 14, 0.92);
-  border: 1px solid rgba(255,255,255,0.14);
-  box-shadow: 0 18px 70px rgba(0,0,0,0.55);
-}
-
-#musicGate .gate h3 {
-  margin: 0 0 8px 0;
-}
-
-#musicGate .gate p {
-  margin: 0 0 12px 0;
-  color: var(--muted);
-  line-height: 1.35;
-}
+document.addEventListener("DOMContentLoaded", () => {
+  wireDragonGame();
+  initForestScene();
+});
