@@ -1,145 +1,263 @@
 /* =========================================================
    Forestspace / Myspace vibes
-   styles.css (FULL FILE)
+   styles.css (CLEAN FULL FILE)
    ========================================================= */
 
-:root {
-  --panel-bg: rgba(10, 18, 14, 0.70);
-  --panel-border: rgba(160, 255, 200, 0.30);
+:root{
+  --panel-bg: rgba(10, 18, 14, 0.74);
+  --panel-border: rgba(160, 255, 200, 0.28);
   --text: #eafff2;
-  --muted: rgba(234, 255, 242, 0.75);
+  --muted: rgba(234, 255, 242, 0.76);
   --accent: #ff7bd1;
   --accent2: #8cffc2;
   --shadow: rgba(0, 0, 0, 0.35);
-
-  --glitter-url: url("assets/ui/glitter.gif");
-  --cursor-url: url("assets/ui/cursor.png");
 }
 
-* { box-sizing: border-box; }
+*{ box-sizing:border-box; }
 
-html, body {
-  height: 100%;
-  margin: 0;
-  padding: 0;
+html, body{
+  height:100%;
+  margin:0;
+  padding:0;
 }
 
-body {
+body{
   color: var(--text);
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
 
-  /* Forest background */
-  background: #06110b url("assets/bg-forest.jpg") center / cover fixed no-repeat;
-
-  /* Myspace-ish cursor */
-  cursor: var(--cursor-url) 6 2, auto;
+  /* No external background dependency (prevents "missing bg" confusion) */
+  background:
+    radial-gradient(circle at 20% 10%, rgba(34, 90, 60, 0.55), rgba(6, 16, 11, 0.92)),
+    radial-gradient(circle at 80% 40%, rgba(120, 60, 160, 0.18), rgba(6, 16, 11, 0.0)),
+    #06100b;
 }
 
-/* A subtle dark overlay so text is readable */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  background: radial-gradient(circle at top, rgba(0,0,0,0.15), rgba(0,0,0,0.65));
-  pointer-events: none;
-  z-index: 0;
+/* Subtle vignette so cards pop */
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  background: radial-gradient(circle at top, rgba(0,0,0,0.15), rgba(0,0,0,0.68));
+  pointer-events:none;
+  z-index:0;
 }
 
 /* =========================================================
-   Layout scaffolding
+   Overlay (Enter gate)
    ========================================================= */
 
-#app {
-  position: relative;
-  z-index: 1;
-  min-height: 100%;
-  padding: 18px;
+.overlay{
+  position:fixed;
+  inset:0;
+  display:grid;
+  place-items:center;
+  z-index:1000;
+  background: rgba(0,0,0,0.65);
 }
 
-.header {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 14px;
+.overlayCard{
+  width:min(560px, calc(100% - 28px));
+  padding:16px;
+  border-radius:18px;
+  background: rgba(10, 18, 14, 0.92);
+  border: 1px solid rgba(255,255,255,0.14);
+  box-shadow: 0 18px 70px rgba(0,0,0,0.55);
 }
 
-.title {
-  font-size: 28px;
-  letter-spacing: 0.5px;
-  text-shadow: 0 2px 12px rgba(0,0,0,0.6);
+.enterActions{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin: 12px 0 10px;
 }
 
-.badges {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  align-items: center;
+/* =========================================================
+   Container + layout
+   ========================================================= */
+
+.container{
+  position:relative;
+  z-index:1;
+  width:min(1120px, calc(100% - 28px));
+  margin: 16px auto 36px;
 }
 
-.badge {
-  font-size: 12px;
-  padding: 6px 10px;
-  border-radius: 999px;
-  background: rgba(0,0,0,0.35);
-  border: 1px solid rgba(255,255,255,0.12);
-  backdrop-filter: blur(8px);
+.grid{
+  display:grid;
+  grid-template-columns: 1.3fr 0.95fr;
+  gap:14px;
+  margin-top: 14px;
 }
 
-.grid {
-  display: grid;
-  grid-template-columns: 1.35fr 0.95fr;
-  gap: 14px;
+@media (max-width: 900px){
+  .grid{ grid-template-columns: 1fr; }
 }
 
-@media (max-width: 900px) {
-  .grid { grid-template-columns: 1fr; }
-}
-
-.panel {
+.card{
   background: var(--panel-bg);
   border: 1px solid var(--panel-border);
   border-radius: 18px;
   box-shadow: 0 10px 30px var(--shadow);
   backdrop-filter: blur(10px);
-  overflow: hidden;
-}
-
-.panel .panel-head {
-  padding: 12px 14px;
-  border-bottom: 1px solid rgba(255,255,255,0.08);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-}
-
-.panel .panel-head h2 {
-  margin: 0;
-  font-size: 16px;
-  letter-spacing: 0.4px;
-}
-
-.panel .panel-body {
   padding: 14px;
 }
 
-.tiny {
+.card.wide{
+  grid-column: 1 / -1;
+}
+
+.card h3{
+  margin: 0 0 8px 0;
+  letter-spacing: 0.3px;
+}
+
+.card h4{
+  margin: 8px 0 10px 0;
+}
+
+.divider{
+  height: 1px;
+  background: rgba(255,255,255,0.10);
+  margin: 12px 0;
+}
+
+.tiny{
   font-size: 12px;
   color: var(--muted);
   line-height: 1.35;
 }
 
-/* =========================================================
-   Buttons / inputs
-   ========================================================= */
-
-button, input, textarea {
-  font-family: inherit;
+a{
+  color: #c8ffe2;
+  text-decoration: none;
+}
+a:hover{
+  text-decoration: underline;
 }
 
-.btn {
+/* =========================================================
+   Profile header
+   ========================================================= */
+
+.profileHeader{
+  padding: 16px;
+  border-radius: 18px;
+  background: rgba(10, 18, 14, 0.82);
+  border: 1px solid rgba(255,255,255,0.14);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.35);
+}
+
+.headerTop{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.badge{
+  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(0,0,0,0.35);
+  border: 1px solid rgba(255,255,255,0.12);
+}
+
+.nowPlaying{
+  display:flex;
+  align-items:center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(0,0,0,0.28);
+  border: 1px solid rgba(255,255,255,0.10);
+}
+
+.npLabel{ font-size: 12px; color: var(--muted); }
+.npText{ font-size: 12px; }
+
+.miniBtn{
+  border: 1px solid rgba(255,255,255,0.16);
+  background: rgba(0,0,0,0.35);
+  color: var(--text);
+  padding: 6px 10px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.status{
+  margin: 10px 0 10px;
+  color: var(--muted);
+}
+.sparkle{
+  color: #ffd6f2;
+  text-shadow: 0 0 16px rgba(255, 123, 209, 0.28);
+}
+
+.marqueeWrap{
+  overflow:hidden;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(0,0,0,0.25);
+}
+
+.marquee{
+  display:inline-block;
+  white-space:nowrap;
+  padding: 8px 12px;
+  animation: marquee 14s linear infinite;
+  font-size: 12px;
+  color: rgba(234,255,242,0.92);
+}
+@keyframes marquee{
+  from{ transform: translateX(0%); }
+  to{ transform: translateX(-50%); }
+}
+
+/* =========================================================
+   Blinkies + links
+   ========================================================= */
+
+.blinkiesRow{
+  display:flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.blinkie{
+  font-size: 11px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px dashed rgba(255,255,255,0.20);
+  background: rgba(0,0,0,0.28);
+  animation: blink 1.2s steps(2) infinite;
+}
+.blinkie.alt{
+  border-style: solid;
+  animation-duration: 0.9s;
+}
+@keyframes blink{
+  0%, 49%{ filter: brightness(1.0); }
+  50%, 100%{ filter: brightness(1.25); }
+}
+
+.blinkiesGrid{
+  display:grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.linkList{
+  margin: 0;
+  padding-left: 18px;
+}
+
+/* =========================================================
+   Buttons
+   ========================================================= */
+
+.btn{
   border: 1px solid rgba(255,255,255,0.12);
   background: rgba(0,0,0,0.35);
   color: var(--text);
@@ -150,415 +268,246 @@ button, input, textarea {
   box-shadow: 0 8px 18px rgba(0,0,0,0.25);
 }
 
-.btn:hover {
+.btn:hover{
   transform: translateY(-1px);
   border-color: rgba(255,123,209,0.55);
   filter: brightness(1.06);
 }
 
-.btn.primary {
+.btn.primary{
   background: linear-gradient(135deg, rgba(255,123,209,0.28), rgba(140,255,194,0.22));
   border-color: rgba(255,255,255,0.18);
 }
 
-.input, textarea {
-  width: 100%;
-  border: 1px solid rgba(255,255,255,0.15);
-  background: rgba(0,0,0,0.35);
-  color: var(--text);
-  padding: 10px 12px;
-  border-radius: 12px;
-  outline: none;
-}
-
-.input:focus, textarea:focus {
-  border-color: rgba(140,255,194,0.55);
-  box-shadow: 0 0 0 3px rgba(140,255,194,0.14);
-}
-
-.row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
-
-@media (max-width: 900px) {
-  .row { grid-template-columns: 1fr; }
-}
-
 /* =========================================================
-   Myspace glitter hover effect
+   Glitter hover (no external gif needed)
    ========================================================= */
 
-.glitter-hover {
+.glitter-hover{
   position: relative;
 }
-
-.glitter-hover::after {
-  content: "";
-  position: absolute;
-  inset: -6px;
-  border-radius: 18px;
-  background-image: var(--glitter-url);
-  background-size: 220px 220px;
+.glitter-hover::after{
+  content:"";
+  position:absolute;
+  inset:-6px;
+  border-radius: 20px;
   opacity: 0;
-  pointer-events: none;
+  pointer-events:none;
   mix-blend-mode: screen;
-  filter: saturate(1.3) contrast(1.15);
   transition: opacity 160ms ease;
+
+  /* fake glitter using gradients */
+  background:
+    radial-gradient(circle at 12% 22%, rgba(255,255,255,0.75), rgba(255,255,255,0.0) 28%),
+    radial-gradient(circle at 65% 35%, rgba(255,123,209,0.55), rgba(255,123,209,0.0) 30%),
+    radial-gradient(circle at 82% 68%, rgba(140,255,194,0.55), rgba(140,255,194,0.0) 34%),
+    radial-gradient(circle at 30% 78%, rgba(255,255,255,0.55), rgba(255,255,255,0.0) 26%);
+  filter: saturate(1.35) contrast(1.2);
 }
-
-.glitter-hover:hover::after {
-  opacity: 0.45;
-}
-
-/* =========================================================
-   Scene layer (kitties + mushrooms)
-   ========================================================= */
-
-#scene {
-  position: relative;
-  height: 440px;
-  border-radius: 18px;
-  overflow: hidden;
-  border: 1px solid rgba(255,255,255,0.10);
-  background: rgba(0,0,0,0.18);
-}
-
-/* Slight vignette inside scene */
-#scene::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle at 40% 20%, rgba(0,0,0,0.00), rgba(0,0,0,0.35));
-  pointer-events: none;
-  z-index: 0;
-}
-
-#scene .layer {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-}
-
-.mushroom {
-  position: absolute;
-  width: 86px;
-  height: auto;
-  filter: drop-shadow(0 10px 10px rgba(0,0,0,0.25));
-  user-select: none;
-  pointer-events: none;
-}
-
-.mushroom.twinkle {
-  animation: twinkle 2.6s ease-in-out infinite;
-}
-
-@keyframes twinkle {
-  0%, 100% { transform: translateY(0) rotate(-1deg); filter: drop-shadow(0 10px 10px rgba(0,0,0,0.25)); }
-  50% { transform: translateY(-2px) rotate(1deg); filter: drop-shadow(0 12px 12px rgba(0,0,0,0.32)); }
+.glitter-hover:hover::after{
+  opacity: 0.55;
 }
 
 /* =========================================================
-   KITTY SPRITE ANIMATIONS (Step 4)
+   Thrift section
    ========================================================= */
 
-.kitty {
-  position: absolute;
-  width: 96px;
-  height: 96px;
-  pointer-events: none;
-  user-select: none;
-  filter: drop-shadow(0 12px 10px rgba(0,0,0,0.35));
-  transform-origin: 50% 80%;
+.thriftGrid{
+  display:grid;
+  gap: 8px;
 }
 
-/* Facing direction via CSS variable (1 or -1) */
-.kitty {
-  transform: scaleX(var(--facing, 1));
-}
-
-/* RUN / WALK cycles: 8 frames => 800% width background */
-.kitty.orange.run {
-  background: url("assets/cats/orange_run.png") 0 0 / 800% 100% no-repeat;
-  animation: run 700ms steps(8) infinite;
-}
-
-.kitty.black.run {
-  background: url("assets/cats/black_run.png") 0 0 / 800% 100% no-repeat;
-  animation: run 620ms steps(8) infinite;
-}
-
-.kitty.grey.walk {
-  background: url("assets/cats/grey_walk.png") 0 0 / 800% 100% no-repeat;
-  animation: walk 1000ms steps(8) infinite;
-}
-
-/* IDLES / SPECIAL */
-.kitty.orange.idle {
-  background: url("assets/cats/orange_stretch.png") 0 0 / 800% 100% no-repeat;
-  animation: idle 1200ms steps(8) infinite;
-}
-
-.kitty.black.idle {
-  background: url("assets/cats/black_idle.png") center / contain no-repeat;
-  animation: kittyBob 520ms ease-in-out infinite;
-}
-
-.kitty.grey.idle {
-  background: url("assets/cats/grey_idle.png") center / contain no-repeat;
-  animation: kittyBob 900ms ease-in-out infinite;
-}
-
-.kitty.grey.sleep {
-  background: url("assets/cats/grey_sleep.png") 0 0 / 800% 100% no-repeat;
-  animation: sleep 1400ms steps(8) infinite;
-}
-
-.kitty.grey.hiss {
-  background: url("assets/cats/grey_hiss.png") 0 0 / 800% 100% no-repeat;
-  animation: hiss 800ms steps(8) infinite;
-}
-
-/* Hop overlay */
-.kitty.hop {
-  animation-name: hopBob, run;
-  animation-duration: 240ms, 700ms;
-  animation-iteration-count: 1, infinite;
-  animation-timing-function: ease-out, steps(8);
-}
-
-@keyframes run   { to { background-position: 100% 0; } }
-@keyframes walk  { to { background-position: 100% 0; } }
-@keyframes idle  { to { background-position: 100% 0; } }
-@keyframes sleep { to { background-position: 100% 0; } }
-@keyframes hiss  { to { background-position: 100% 0; } }
-
-@keyframes kittyBob {
-  0%   { translate: 0 0; }
-  50%  { translate: 0 -2px; }
-  100% { translate: 0 0; }
-}
-
-@keyframes hopBob {
-  0%   { translate: 0 0; }
-  60%  { translate: 0 -18px; }
-  100% { translate: 0 0; }
-}
-
-/* =========================================================
-   Lists
-   ========================================================= */
-
-ul.clean {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-ul.clean li {
+.thriftRow{
+  display:flex;
+  gap: 10px;
+  align-items: baseline;
   padding: 10px 10px;
-  border: 1px solid rgba(255,255,255,0.10);
   border-radius: 14px;
-  background: rgba(0,0,0,0.28);
-  margin-bottom: 10px;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(0,0,0,0.24);
 }
 
-.meta {
-  font-size: 12px;
+.thriftRow span{
   color: var(--muted);
+  min-width: 92px;
+}
+
+.top8Grid{
+  display:grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+@media (max-width: 900px){
+  .top8Grid{ grid-template-columns: repeat(2, 1fr); }
+}
+
+.top8Card{
+  padding: 10px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(0,0,0,0.22);
 }
 
 /* =========================================================
-   Album modal
-   ========================================================= */
-
-#albumModal {
-  position: fixed;
-  inset: 0;
-  display: none;
-  z-index: 999;
-}
-
-#albumModal.active {
-  display: block;
-}
-
-#albumModal .backdrop {
-  position: absolute;
-  inset: 0;
-  background: rgba(0,0,0,0.65);
-}
-
-#albumModal .modal {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: min(900px, calc(100% - 30px));
-  border-radius: 18px;
-  overflow: hidden;
-  border: 1px solid rgba(255,255,255,0.14);
-  background: rgba(10, 18, 14, 0.88);
-  box-shadow: 0 18px 70px rgba(0,0,0,0.55);
-}
-
-#albumModal .modal-head {
-  padding: 12px 14px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 10px;
-  border-bottom: 1px solid rgba(255,255,255,0.08);
-}
-
-#albumModal img.viewer {
-  width: 100%;
-  height: 460px;
-  object-fit: contain;
-  display: block;
-  background: rgba(0,0,0,0.35);
-}
-
-#albumModal .modal-foot {
-  padding: 12px 14px;
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-  align-items: center;
-}
-
-.caption {
-  font-size: 13px;
-  color: var(--muted);
-}
-
-/* =========================================================
-   Music gate overlay (optional)
-   ========================================================= */
-
-#musicGate {
-  position: fixed;
-  inset: 0;
-  z-index: 1000;
-  display: none;
-}
-
-#musicGate.active {
-  display: grid;
-  place-items: center;
-}
-
-#musicGate .gate {
-  width: min(560px, calc(100% - 28px));
-  padding: 16px;
-  border-radius: 18px;
-  background: rgba(10, 18, 14, 0.92);
-  border: 1px solid rgba(255,255,255,0.14);
-  box-shadow: 0 18px 70px rgba(0,0,0,0.55);
-}
-
-#musicGate .gate h3 {
-  margin: 0 0 8px 0;
-}
-
-#musicGate .gate p {
-  margin: 0 0 12px 0;
-  color: var(--muted);
-  line-height: 1.35;
-}
-/* =========================
    Forest Scene + Sprites
-   ========================= */
+   ========================================================= */
 
-#scene {
+#scene{
   position: relative;
   width: 100%;
   height: 440px;
-  margin: 18px 0;
+  margin: 12px 0 6px;
   border-radius: 18px;
   overflow: hidden;
   border: 1px solid rgba(255,255,255,0.16);
   background: rgba(0,0,0,0.18);
 }
 
-#scene .layer,
-#sceneLayer.layer {
-  position: absolute;
-  inset: 0;
+#scene::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background: radial-gradient(circle at 40% 20%, rgba(0,0,0,0.0), rgba(0,0,0,0.35));
+  pointer-events:none;
+  z-index:0;
 }
 
-.mushroom {
-  position: absolute;
-  width: 86px;
-  height: auto;
-  pointer-events: none;
-  user-select: none;
+#scene .layer{
+  position:absolute;
+  inset:0;
+  z-index:1;
+}
+
+.mushroom{
+  position:absolute;
+  height:auto;
+  pointer-events:none;
+  user-select:none;
   filter: drop-shadow(0 10px 10px rgba(0,0,0,0.25));
 }
 
-.kitty {
-  position: absolute;
+.kitty{
+  position:absolute;
   width: 96px;
   height: 96px;
-  pointer-events: none;
-  user-select: none;
+  pointer-events:none;
+  user-select:none;
   transform-origin: 50% 80%;
   filter: drop-shadow(0 12px 10px rgba(0,0,0,0.35));
   transform: scaleX(var(--facing, 1));
 }
 
 /* 8-frame sheets => 800% */
-.kitty.orange.run {
+.kitty.orange.run{
   background: url("assets/cats/orange_run.png") 0 0 / 800% 100% no-repeat;
   animation: run 700ms steps(8) infinite;
 }
-.kitty.orange.idle {
+.kitty.orange.idle{
   background: url("assets/cats/orange_stretch.png") 0 0 / 800% 100% no-repeat;
   animation: run 1200ms steps(8) infinite;
 }
 
-.kitty.black.run {
+.kitty.black.run{
   background: url("assets/cats/black_run.png") 0 0 / 800% 100% no-repeat;
   animation: run 620ms steps(8) infinite;
 }
-.kitty.black.idle {
+.kitty.black.idle{
   background: url("assets/cats/black_idle.png") center / contain no-repeat;
   animation: kittyBob 520ms ease-in-out infinite;
 }
 
-.kitty.grey.walk {
+.kitty.grey.walk{
   background: url("assets/cats/grey_walk.png") 0 0 / 800% 100% no-repeat;
   animation: run 1000ms steps(8) infinite;
 }
-.kitty.grey.sleep {
+.kitty.grey.sleep{
   background: url("assets/cats/grey_sleep.png") 0 0 / 800% 100% no-repeat;
   animation: run 1400ms steps(8) infinite;
 }
-.kitty.grey.hiss {
+.kitty.grey.hiss{
   background: url("assets/cats/grey_hiss.png") 0 0 / 800% 100% no-repeat;
   animation: run 800ms steps(8) infinite;
 }
-.kitty.grey.idle {
+.kitty.grey.idle{
   background: url("assets/cats/grey_idle.png") center / contain no-repeat;
   animation: kittyBob 900ms ease-in-out infinite;
 }
 
 /* Hop overlay */
-.kitty.hop {
+.kitty.hop{
   animation-name: hopBob, run;
   animation-duration: 240ms, 700ms;
   animation-iteration-count: 1, infinite;
   animation-timing-function: ease-out, steps(8);
 }
 
-@keyframes run { to { background-position: 100% 0; } }
-@keyframes kittyBob {
-  0%, 100% { translate: 0 0; }
-  50% { translate: 0 -2px; }
+@keyframes run{ to{ background-position: 100% 0; } }
+
+@keyframes kittyBob{
+  0%, 100%{ translate: 0 0; }
+  50%{ translate: 0 -2px; }
 }
-@keyframes hopBob {
-  0% { translate: 0 0; }
-  60% { translate: 0 -18px; }
-  100% { translate: 0 0; }
+
+@keyframes hopBob{
+  0%{ translate: 0 0; }
+  60%{ translate: 0 -18px; }
+  100%{ translate: 0 0; }
+}
+
+/* =========================================================
+   Dragon game visuals (minimal)
+   ========================================================= */
+
+.gameWrap{
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(0,0,0,0.22);
+}
+
+.gameStep{ margin: 8px 0; }
+.hidden{ display:none !important; }
+
+.choices{
+  display:flex;
+  flex-wrap:wrap;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.resultText{
+  margin: 10px 0 8px;
+  font-weight: 600;
+}
+
+.sky{
+  margin-top: 12px;
+  height: 140px;
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(20,30,60,0.55), rgba(0,0,0,0.25));
+  border: 1px solid rgba(255,255,255,0.10);
+  position: relative;
+  overflow:hidden;
+}
+
+.dragon{
+  position:absolute;
+  left: 14px;
+  top: 22px;
+  font-size: 36px;
+}
+
+.rider{
+  position:absolute;
+  left: 70px;
+  top: 18px;
+  font-size: 28px;
+}
+
+.footer{
+  margin-top: 18px;
+  text-align:center;
+  opacity: 0.9;
 }
