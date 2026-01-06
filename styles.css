@@ -467,3 +467,98 @@ ul.clean li {
   color: var(--muted);
   line-height: 1.35;
 }
+/* =========================
+   Forest Scene + Sprites
+   ========================= */
+
+#scene {
+  position: relative;
+  width: 100%;
+  height: 440px;
+  margin: 18px 0;
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.16);
+  background: rgba(0,0,0,0.18);
+}
+
+#scene .layer,
+#sceneLayer.layer {
+  position: absolute;
+  inset: 0;
+}
+
+.mushroom {
+  position: absolute;
+  width: 86px;
+  height: auto;
+  pointer-events: none;
+  user-select: none;
+  filter: drop-shadow(0 10px 10px rgba(0,0,0,0.25));
+}
+
+.kitty {
+  position: absolute;
+  width: 96px;
+  height: 96px;
+  pointer-events: none;
+  user-select: none;
+  transform-origin: 50% 80%;
+  filter: drop-shadow(0 12px 10px rgba(0,0,0,0.35));
+  transform: scaleX(var(--facing, 1));
+}
+
+/* 8-frame sheets => 800% */
+.kitty.orange.run {
+  background: url("assets/cats/orange_run.png") 0 0 / 800% 100% no-repeat;
+  animation: run 700ms steps(8) infinite;
+}
+.kitty.orange.idle {
+  background: url("assets/cats/orange_stretch.png") 0 0 / 800% 100% no-repeat;
+  animation: run 1200ms steps(8) infinite;
+}
+
+.kitty.black.run {
+  background: url("assets/cats/black_run.png") 0 0 / 800% 100% no-repeat;
+  animation: run 620ms steps(8) infinite;
+}
+.kitty.black.idle {
+  background: url("assets/cats/black_idle.png") center / contain no-repeat;
+  animation: kittyBob 520ms ease-in-out infinite;
+}
+
+.kitty.grey.walk {
+  background: url("assets/cats/grey_walk.png") 0 0 / 800% 100% no-repeat;
+  animation: run 1000ms steps(8) infinite;
+}
+.kitty.grey.sleep {
+  background: url("assets/cats/grey_sleep.png") 0 0 / 800% 100% no-repeat;
+  animation: run 1400ms steps(8) infinite;
+}
+.kitty.grey.hiss {
+  background: url("assets/cats/grey_hiss.png") 0 0 / 800% 100% no-repeat;
+  animation: run 800ms steps(8) infinite;
+}
+.kitty.grey.idle {
+  background: url("assets/cats/grey_idle.png") center / contain no-repeat;
+  animation: kittyBob 900ms ease-in-out infinite;
+}
+
+/* Hop overlay */
+.kitty.hop {
+  animation-name: hopBob, run;
+  animation-duration: 240ms, 700ms;
+  animation-iteration-count: 1, infinite;
+  animation-timing-function: ease-out, steps(8);
+}
+
+@keyframes run { to { background-position: 100% 0; } }
+@keyframes kittyBob {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 -2px; }
+}
+@keyframes hopBob {
+  0% { translate: 0 0; }
+  60% { translate: 0 -18px; }
+  100% { translate: 0 0; }
+}
