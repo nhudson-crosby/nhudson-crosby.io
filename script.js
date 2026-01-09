@@ -1,8 +1,3 @@
-/* =========================================================
-   Forestspace / Myspace vibes
-   script.js (FULL FILE — fixed for your repo paths)
-   ========================================================= */
-
 (() => {
   // ---------- Helpers ----------
   const qs = (sel) => document.querySelector(sel);
@@ -27,7 +22,7 @@
   const scene = qs("#scene");
   const sceneLayer = qs("#sceneLayer");
 
-  // Dragon game elements (must exist in your index.html)
+  // Dragon game
   const stepPickDragon = qs("#stepPickDragon");
   const stepPickTreat = qs("#stepPickTreat");
   const stepResult = qs("#stepResult");
@@ -35,31 +30,38 @@
   const rideRow = qs("#rideRow");
   const rideBtn = qs("#rideBtn");
   const resetBtn = qs("#resetBtn");
+  const dragonImg = qs("#dragonImg");
+  const dragonMeta = qs("#dragonMeta");
 
   // ---------- Now playing ----------
   const playlist = [
     "2010 pop era ✨",
     "Ke$ha-coded chaos 💖",
-    "Miley chorus drifting through the trees 🌙",
-    "sparkly forest rave 🍄",
+    "Miley chorus in the distance 🌙",
+    "sparkly forest rave 🍄"
   ];
   if (npText) npText.textContent = pick(playlist);
 
   // ---------- Music gate ----------
   async function tryPlayMusic() {
     if (!bgm) return;
-    try { await bgm.play(); } catch {}
+    try { await bgm.play(); } catch (e) {}
+  }
+
+  function setMuted(muted) {
+    if (!bgm) return;
+    bgm.muted = muted;
+    if (!muted) tryPlayMusic();
   }
 
   function closeOverlay() {
     if (!enterOverlay) return;
-    enterOverlay.classList.add("hidden"); // styles.css must include .overlay.hidden { display:none; }
+    enterOverlay.classList.add("hidden");
   }
 
   if (enterBtn) {
-    enterBtn.addEventListener("click", async () => {
-      if (bgm) bgm.muted = false;
-      await tryPlayMusic();
+    enterBtn.addEventListener("click", () => {
+      setMuted(false);
       closeOverlay();
       bootScene();
     });
@@ -67,7 +69,7 @@
 
   if (muteBtn) {
     muteBtn.addEventListener("click", () => {
-      if (bgm) bgm.muted = true;
+      setMuted(true);
       closeOverlay();
       bootScene();
     });
@@ -85,7 +87,7 @@
     });
   }
 
-  // ---------- Scene assets (your repo paths) ----------
+  // ---------- Scene assets (YOUR REAL PATHS) ----------
   const MUSHROOMS = [
     "assets/mushrooms/amanita.png",
     "assets/mushrooms/balloon.png",
@@ -100,15 +102,15 @@
   ];
 
   const CATS = {
-    orange: { runClass: "kitty orange run", idleClass: "kitty orange idle" },
-    black:  { runClass: "kitty black run",  idleClass: "kitty black idle"  },
-    grey:   { runClass: "kitty grey walk",  idleClass: "kitty grey idle"   },
+    orange: { runClass: "orange run", idleClass: "orange idle" },
+    black:  { runClass: "black run",  idleClass: "black idle"  },
+    grey:   { runClass: "grey walk",  idleClass: "grey idle"   },
   };
 
   // ---------- Scene state ----------
   const state = {
-    mushrooms: [], // { el, placedRect }
-    cats: [],      // kitty objects
+    mushrooms: [],
+    cats: [],
     started: false,
     chaseCooldown: 0,
   };
@@ -131,54 +133,57 @@
     return { x: r.left - sr.left, y: r.top - sr.top, w: r.width, h: r.height };
   }
 
-  // ---------- Mushrooms (placed in a ground band) ----------
+  // Place mushrooms in a ground band; avoid overlap
   function spawnMushrooms(count = 14) {
     const { w, h } = sceneDims();
-    const groundMin = h * 0.64;
-    const groundMax = h * 0.86;
-    const placed = [];
+    const groundYMin = h * 0.60;
+    const groundYMax = h * 0.86;
+
+    const placedRects = [];
 
     for (let i = 0; i < count; i++) {
       const img = document.createElement("img");
       img.className = "mushroom";
       img.src = pick(MUSHROOMS);
       img.alt = "mushroom";
-      img.style.left = "0px";
-      img.style.top = "0px";
+
+      // IMPORTANT: don't leave everything at 0,0 while loading
+      img.style.left = `${rand(20, w - 120)}px`;
+      img.style.top = `${rand(groundYMin, groundYMax)}px`;
+
       sceneLayer.appendChild(img);
 
       img.onload = () => {
-        const mw = img.naturalWidth ? clamp(img.naturalWidth * 0.25, 50, 110) : 84;
-        img.style.width = `${mw}px`;
+        const mw = img.naturalWidth
+          ? clamp(img.naturalWidth * 0.22, 44, 120)
+          : 88;
+        img.style.width = mw + "px";
 
-        let tries = 60;
+        let tries = 80;
         while (tries-- > 0) {
-          const x = rand(20, w - mw - 20);
-          const y = rand(groundMin, groundMax);
+          const x = rand(16, w - mw - 16);
+          const y = rand(groundYMin, groundYMax);
           img.style.left = `${x}px`;
           img.style.top = `${y}px`;
 
           const r = rectInScene(img);
-          const hit = placed.some(pr => intersects(r, pr));
+          const hit = placedRects.some(pr => intersects(r, pr));
           if (!hit) {
-            placed.push(r);
-            state.mushrooms.push({ el: img, rect: r });
-            break;
+            placedRects.push(r);
+            state.mushrooms.push(img);
+            return;
           }
         }
 
-        // If we failed to find a non-overlapping spot, still keep it
-        if (!state.mushrooms.find(m => m.el === img)) {
-          state.mushrooms.push({ el: img, rect: rectInScene(img) });
-        }
+        // if we failed to place after tries, still keep it (but it's rare)
+        state.mushrooms.push(img);
       };
     }
   }
 
-  // ---------- Kitties ----------
   function makeKitty(kind, x, y) {
     const el = document.createElement("div");
-    el.className = CATS[kind].runClass;
+    el.className = `kitty ${CATS[kind].runClass}`;
     el.style.left = `${x}px`;
     el.style.top = `${y}px`;
     el.style.setProperty("--facing", "1");
@@ -187,184 +192,135 @@
     return {
       kind,
       el,
-      x, y,
+      x,
+      y,
       vx: rand(0.9, 1.6) * (Math.random() < 0.5 ? -1 : 1),
-      mode: "roam", // roam | chase | idle | sleep | hiss
+      mode: "roam",
       modeT: 0,
       target: null,
       lastHopAt: 0,
-      speedMul: 1,
     };
   }
 
   function spawnKitties() {
     const { w, h } = sceneDims();
-    const baseY = h * 0.74;
+    const baseY = h * 0.72;
 
     state.cats.push(makeKitty("orange", w * 0.20, baseY));
-    state.cats.push(makeKitty("black",  w * 0.55, baseY + 10));
+    state.cats.push(makeKitty("black",  w * 0.60, baseY + 10));
     state.cats.push(makeKitty("grey",   w * 0.40, baseY + 18));
 
-    // grey starts calm
+    // grey starts bored sometimes
     const grey = state.cats.find(c => c.kind === "grey");
     if (grey) {
       grey.mode = "idle";
-      grey.modeT = 220;
-      grey.el.className = CATS.grey.idleClass;
+      grey.modeT = 180;
+      grey.el.className = "kitty grey idle";
     }
   }
 
-  function updateKitty(k, dt) {
+  function updateKitty(kitty, dt) {
     const { w, h } = sceneDims();
 
-    // personality speed
-    k.speedMul =
-      k.kind === "black" ? 1.25 :
-      k.kind === "grey"  ? 0.85 :
-                           1.00;
+    // personalities
+    const speedMul =
+      kitty.kind === "black" ? 1.25 :
+      kitty.kind === "grey"  ? 0.85 : 1.0;
 
-    if (k.modeT > 0) k.modeT -= dt;
+    if (kitty.modeT > 0) kitty.modeT -= dt;
 
     // grey special modes occasionally
-    if (k.kind === "grey" && k.modeT <= 0 && Math.random() < 0.003) {
-      k.mode = pick(["idle", "sleep", "hiss"]);
-      k.modeT = randi(160, 320);
-      k.el.className =
-        k.mode === "sleep" ? "kitty grey sleep" :
-        k.mode === "hiss"  ? "kitty grey hiss"  :
-                             "kitty grey idle";
+    if (kitty.kind === "grey" && kitty.modeT <= 0 && Math.random() < 0.003) {
+      const mode = pick(["idle", "sleep", "hiss"]);
+      kitty.mode = mode;
+      kitty.modeT = randi(180, 320);
+      kitty.el.className =
+        mode === "sleep" ? "kitty grey sleep" :
+        mode === "hiss"  ? "kitty grey hiss"  :
+                           "kitty grey idle";
     }
 
-    // if grey is special-mode: barely moves
-    if (k.kind === "grey" && (k.mode === "sleep" || k.mode === "idle" || k.mode === "hiss")) {
-      k.vx *= 0.92;
-      k.x += (k.vx * 0.10) * dt;
-      k.x = clamp(k.x, 10, w - 110);
-      k.el.style.left = `${k.x}px`;
+    // if grey is idle/sleep/hiss, minimal movement
+    if (kitty.kind === "grey" && (kitty.mode === "sleep" || kitty.mode === "idle" || kitty.mode === "hiss")) {
+      kitty.x += kitty.vx * 0.02 * dt;
+      kitty.x = clamp(kitty.x, 10, w - 130);
+      kitty.el.style.left = `${kitty.x}px`;
       return;
     }
 
-    // base class while moving
-    if (k.kind === "grey") k.el.className = "kitty grey walk";
-    else if (k.kind === "black") k.el.className = "kitty black run";
-    else k.el.className = "kitty orange run";
+    // default anim classes
+    if (kitty.kind === "grey") kitty.el.className = "kitty grey walk";
+    if (kitty.kind === "black") kitty.el.className = "kitty black run";
+    if (kitty.kind === "orange") kitty.el.className = "kitty orange run";
 
-    // chase logic
-    if (k.mode === "chase" && k.target) {
-      const dx = (k.target.x ?? k.target) - k.x;
-      k.vx = clamp(dx * 0.02, -3.2, 3.2);
-    } else {
-      // gentle wander
-      k.vx += rand(-0.02, 0.02) * dt;
-      k.vx = clamp(k.vx, -2.2, 2.2);
-    }
+    // wander
+    kitty.vx += rand(-0.02, 0.02) * dt;
+    kitty.vx = clamp(kitty.vx, -2.2, 2.2);
 
-    // build kitty collision rect (lower half)
-    const kRect = { x: k.x + 10, y: k.y + 36, w: 66, h: 44 };
-
-    // find nearest mushroom rect
+    // avoid mushrooms + hop
+    const kRect = { x: kitty.x + 16, y: kitty.y + 44, w: 72, h: 48 };
     let nearest = null;
-    let nearestD2 = Infinity;
+    let nearestDist = Infinity;
+
     for (const m of state.mushrooms) {
-      const mr = rectInScene(m.el);
-      const dx = (mr.x + mr.w / 2) - (kRect.x + kRect.w / 2);
-      const dy = (mr.y + mr.h / 2) - (kRect.y + kRect.h / 2);
-      const d2 = dx * dx + dy * dy;
-      if (d2 < nearestD2) { nearestD2 = d2; nearest = mr; }
+      const mr = rectInScene(m);
+      const dx = (mr.x + mr.w/2) - (kRect.x + kRect.w/2);
+      const dy = (mr.y + mr.h/2) - (kRect.y + kRect.h/2);
+      const d2 = dx*dx + dy*dy;
+      if (d2 < nearestDist) { nearestDist = d2; nearest = mr; }
     }
 
-    // avoid + hop
-    if (nearest && nearestD2 < 220 * 220) {
-      const centerK = kRect.x + kRect.w / 2;
-      const centerM = nearest.x + nearest.w / 2;
-      const away = centerK - centerM;
+    if (nearest && nearestDist < 220*220) {
+      const away = (kRect.x + kRect.w/2) - (nearest.x + nearest.w/2);
+      kitty.vx += clamp(away * 0.0008, -0.55, 0.55) * dt;
 
-      // steer away
-      k.vx += clamp(away * 0.0008, -0.5, 0.5) * dt;
-
-      // hop if colliding
       const willHit = intersects(
         kRect,
-        { x: nearest.x + 6, y: nearest.y + 16, w: nearest.w - 12, h: nearest.h - 16 }
+        { x: nearest.x + 8, y: nearest.y + 18, w: nearest.w - 16, h: nearest.h - 18 }
       );
 
       const now = performance.now();
-      if (willHit && now - k.lastHopAt > 800) {
-        k.lastHopAt = now;
-        k.el.classList.add("hop");
-        setTimeout(() => k.el.classList.remove("hop"), 260);
-        k.vx += (k.vx >= 0 ? 0.8 : -0.8);
+      if (willHit && now - kitty.lastHopAt > 800) {
+        kitty.lastHopAt = now;
+        kitty.el.classList.add("hop");
+        setTimeout(() => kitty.el.classList.remove("hop"), 260);
+        kitty.vx += (kitty.vx >= 0 ? 0.9 : -0.9);
       }
     }
 
     // move
-    const speed = k.vx * k.speedMul;
-    k.x += speed * dt * 0.06;
+    const speed = kitty.vx * speedMul;
+    kitty.x += speed * dt * 0.06;
 
-    // edges
-    if (k.x < 8) { k.x = 8; k.vx *= -1; }
-    if (k.x > w - 110) { k.x = w - 110; k.vx *= -1; }
+    // bounce edges
+    if (kitty.x < 8) { kitty.x = 8; kitty.vx *= -1; }
+    if (kitty.x > w - 130) { kitty.x = w - 130; kitty.vx *= -1; }
 
     // face direction
-    k.el.style.setProperty("--facing", speed >= 0 ? "1" : "-1");
+    kitty.el.style.setProperty("--facing", speed >= 0 ? "1" : "-1");
 
-    // ground
-    const groundY = h * 0.74 + (k.kind === "black" ? 8 : 0) + (k.kind === "grey" ? 18 : 0);
-    k.y = groundY;
+    // ground y
+    const groundY = h * 0.72 + (kitty.kind === "black" ? 10 : 0) + (kitty.kind === "grey" ? 18 : 0);
+    kitty.y = groundY;
 
-    k.el.style.left = `${k.x}px`;
-    k.el.style.top = `${k.y}px`;
+    kitty.el.style.left = `${kitty.x}px`;
+    kitty.el.style.top  = `${kitty.y}px`;
   }
 
-  // occasional cutscene: black chases orange
-  function maybeStartChase(dt) {
-    if (state.chaseCooldown > 0) {
-      state.chaseCooldown -= dt;
-      return;
-    }
-    if (Math.random() < 0.0025) {
-      const orange = state.cats.find(c => c.kind === "orange");
-      const black = state.cats.find(c => c.kind === "black");
-      if (!orange || !black) return;
-
-      black.mode = "chase";
-      black.target = orange;
-      black.modeT = randi(140, 260);
-
-      // orange flees a bit
-      orange.mode = "chase";
-      orange.target = { x: orange.x + (orange.x < (sceneDims().w / 2) ? 260 : -260) };
-      orange.modeT = black.modeT;
-
-      state.chaseCooldown = randi(420, 700);
-    }
-  }
-
-  // ---------- Loop ----------
   let lastT = 0;
   function tick(t) {
     if (!state.started) return;
     const dt = Math.min(32, t - lastT || 16);
     lastT = t;
 
-    maybeStartChase(dt);
-
-    for (const k of state.cats) {
-      if (k.mode === "chase" && k.modeT <= 0) {
-        k.mode = "roam";
-        k.target = null;
-      }
-      updateKitty(k, dt);
-    }
-
+    for (const k of state.cats) updateKitty(k, dt);
     requestAnimationFrame(tick);
   }
 
   function bootScene() {
     if (state.started) return;
-    if (!scene || !sceneLayer) return;
-
     state.started = true;
+
     clearScene();
 
     const w = sceneDims().w;
@@ -379,55 +335,22 @@
     });
   }
 
-  // ---------- Dragon game wiring (SHOW PNGs) ----------
-  // Your repo folder: assets/dragons/*.png
+  // ---------- Dragon game wiring (YOUR REAL PATHS) ----------
   const DRAGONS = {
     ember: "assets/dragons/ember.png",
-    storm: "assets/dragons/storm.png", // if missing, we’ll show fallback text
+    storm: "assets/dragons/storm.png",
     moss:  "assets/dragons/moss.png",
   };
 
   let selectedDragon = null;
   let selectedTreat = null;
 
-  // inject a dragon panel into Step 3
-  let dragonPanel = null;
-  function ensureDragonPanel() {
-    if (dragonPanel) return dragonPanel;
-    if (!stepResult) return null;
-
-    const wrap = document.createElement("div");
-    wrap.style.marginTop = "12px";
-    wrap.style.display = "grid";
-    wrap.style.gap = "10px";
-
-    const img = document.createElement("img");
-    img.alt = "dragon";
-    img.style.width = "min(360px, 100%)";
-    img.style.borderRadius = "16px";
-    img.style.border = "1px solid rgba(255,255,255,0.18)";
-    img.style.boxShadow = "0 14px 40px rgba(0,0,0,0.35)";
-    img.style.background = "rgba(0,0,0,0.25)";
-    img.loading = "lazy";
-
-    const note = document.createElement("div");
-    note.className = "tiny";
-    note.textContent = "";
-
-    wrap.appendChild(img);
-    wrap.appendChild(note);
-    stepResult.appendChild(wrap);
-
-    dragonPanel = { wrap, img, note };
-    return dragonPanel;
-  }
-
   function showStep(stepEl) {
-    [stepPickDragon, stepPickTreat, stepResult].forEach((s) => s && s.classList.add("hidden"));
-    stepEl && stepEl.classList.remove("hidden");
+    [stepPickDragon, stepPickTreat, stepResult].forEach((s) => s.classList.add("hidden"));
+    stepEl.classList.remove("hidden");
   }
 
-  function outcome(_dragon, treat) {
+  function outcome(dragon, treat) {
     if (treat === "spicyJerky") return "fire";
     if (treat === "stardustBerry") return "wings";
     return "bite";
@@ -436,38 +359,28 @@
   function renderResult() {
     const out = outcome(selectedDragon, selectedTreat);
 
+    if (dragonImg) dragonImg.src = DRAGONS[selectedDragon] || "";
+    if (dragonMeta) {
+      dragonMeta.innerHTML = `
+        <div><strong>${selectedDragon.toUpperCase()}</strong> dragon chosen.</div>
+        <div>Treat: <strong>${selectedTreat}</strong>.</div>
+      `;
+    }
+
     if (rideRow) rideRow.classList.add("hidden");
 
     if (out === "fire") {
-      if (resultText) resultText.textContent = "Your dragon learns FIRE BREATH 🔥 (iconic).";
+      resultText.textContent = "Your dragon learns FIRE BREATH 🔥 (it’s a little dramatic but we love that).";
     } else if (out === "wings") {
-      if (resultText) resultText.textContent = "Your dragon grows WINGS 🪽. You may now ride.";
+      resultText.textContent = "Your dragon grows WINGS 🪽. Congratulations: you may now ride.";
       if (rideRow) rideRow.classList.remove("hidden");
     } else {
-      if (resultText) resultText.textContent = "Your dragon BITES you. Not hard. Just disrespectfully.";
-    }
-
-    const panel = ensureDragonPanel();
-    if (panel) {
-      const src = DRAGONS[selectedDragon] || "";
-      panel.img.src = src;
-
-      // if file missing, show friendly note
-      panel.img.onerror = () => {
-        panel.note.innerHTML =
-          `Couldn’t load <code>${src}</code>.<br>` +
-          `Make sure your dragon PNG exists at <code>assets/dragons/${selectedDragon}.png</code> (or update DRAGONS paths).`;
-      };
-
-      panel.note.innerHTML =
-        `<div><strong>${(selectedDragon || "").toUpperCase()}</strong> dragon chosen.</div>` +
-        `<div>Treat: <strong>${selectedTreat}</strong></div>`;
+      resultText.textContent = "Your dragon BITES you. Not hard. Just… disrespectfully.";
     }
 
     showStep(stepResult);
   }
 
-  // bind game buttons
   document.querySelectorAll("[data-dragon]").forEach((btn) => {
     btn.addEventListener("click", () => {
       selectedDragon = btn.getAttribute("data-dragon");
@@ -497,4 +410,4 @@
     });
   }
 
-})(); // end IIFE
+})();
