@@ -1,289 +1,500 @@
 /* =========================================================
-   Nikita’s Forestspace
-   MySpace-inspired forest scene
-   FULL styles.css
+   Forestspace / Myspace vibes
+   script.js (FULL FILE — fixed for your repo paths)
    ========================================================= */
 
-/* -------------------------
-   Variables & assets
--------------------------- */
-:root {
-  --panel-bg: rgba(10, 18, 14, 0.72);
-  --panel-border: rgba(160, 255, 200, 0.30);
-  --text: #eafff2;
-  --muted: rgba(234, 255, 242, 0.75);
-  --accent: #ff7bd1;
-  --accent2: #8cffc2;
-  --shadow: rgba(0, 0, 0, 0.45);
+(() => {
+  // ---------- Helpers ----------
+  const qs = (sel) => document.querySelector(sel);
+  const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
+  const rand = (a, b) => a + Math.random() * (b - a);
+  const randi = (a, b) => Math.floor(rand(a, b + 1));
+  const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
-  /* REAL paths you actually have */
-  --cursor-url: url("assets/cursor/cursor.png");
-}
-
-/* -------------------------
-   Base reset
--------------------------- */
-* {
-  box-sizing: border-box;
-}
-
-html, body {
-  margin: 0;
-  padding: 0;
-  min-height: 100%;
-}
-
-body {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    Roboto, Oxygen, Ubuntu, Cantarell, "Helvetica Neue", Arial, sans-serif;
-
-  color: var(--text);
-
-  /* 🌲 Forest background */
-  background:
-    linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.65)),
-    url("assets/ui/bg-forest.png") center / cover fixed no-repeat;
-
-  cursor: var(--cursor-url) 6 2, auto;
-  overflow-x: hidden;
-}
-
-/* -------------------------
-   Page container
--------------------------- */
-.container {
-  position: relative;
-  z-index: 2;
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 24px 16px 80px;
-}
-
-/* -------------------------
-   Overlay (ENTER GATE)
--------------------------- */
-.overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.65);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 999;
-}
-
-.overlay.hidden {
-  display: none;
-}
-
-.overlayCard {
-  width: min(560px, calc(100% - 32px));
-  padding: 22px;
-  border-radius: 20px;
-  background: rgba(10, 18, 14, 0.92);
-  border: 1px solid rgba(255,255,255,0.15);
-  box-shadow: 0 20px 80px rgba(0,0,0,0.6);
-  text-align: center;
-}
-
-.enterActions {
-  display: flex;
-  gap: 12px;
-  justify-content: center;
-  margin-top: 16px;
-}
-
-/* -------------------------
-   Buttons
--------------------------- */
-button {
-  appearance: none;
-  border: 1px solid rgba(255,255,255,0.18);
-  background: rgba(0,0,0,0.45);
-  color: var(--text);
-  padding: 10px 16px;
-  border-radius: 14px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: transform 120ms ease, filter 120ms ease;
-}
-
-button:hover {
-  transform: translateY(-1px);
-  filter: brightness(1.1);
-}
-
-button.secondary {
-  opacity: 0.85;
-}
-
-/* -------------------------
-   Headers / text
--------------------------- */
-h1, h2, h3, h4 {
-  margin: 0 0 10px 0;
-  font-weight: 600;
-}
-
-.tiny {
-  font-size: 12px;
-  color: var(--muted);
-}
-
-/* -------------------------
-   Cards / panels
--------------------------- */
-.card {
-  background: var(--panel-bg);
-  border: 1px solid var(--panel-border);
-  border-radius: 20px;
-  padding: 18px;
-  box-shadow: 0 14px 40px var(--shadow);
-  backdrop-filter: blur(10px);
-}
-
-.card.wide {
-  grid-column: span 2;
-}
-
-@media (max-width: 900px) {
-  .card.wide {
-    grid-column: span 1;
+  function intersects(a, b) {
+    return !(a.x + a.w < b.x || a.x > b.x + b.w || a.y + a.h < b.y || a.y > b.y + b.h);
   }
-}
 
-/* -------------------------
-   Grid layout
--------------------------- */
-.grid {
-  display: grid;
-  grid-template-columns: 1.4fr 1fr;
-  gap: 16px;
-}
+  // ---------- Elements ----------
+  const enterOverlay = qs("#enterOverlay");
+  const enterBtn = qs("#enterBtn");
+  const muteBtn = qs("#muteBtn");
+  const bgm = qs("#bgm");
 
-@media (max-width: 900px) {
-  .grid {
-    grid-template-columns: 1fr;
+  const npText = qs("#npText");
+  const toggleMusicBtn = qs("#toggleMusicBtn");
+
+  const scene = qs("#scene");
+  const sceneLayer = qs("#sceneLayer");
+
+  // Dragon game elements (must exist in your index.html)
+  const stepPickDragon = qs("#stepPickDragon");
+  const stepPickTreat = qs("#stepPickTreat");
+  const stepResult = qs("#stepResult");
+  const resultText = qs("#resultText");
+  const rideRow = qs("#rideRow");
+  const rideBtn = qs("#rideBtn");
+  const resetBtn = qs("#resetBtn");
+
+  // ---------- Now playing ----------
+  const playlist = [
+    "2010 pop era ✨",
+    "Ke$ha-coded chaos 💖",
+    "Miley chorus drifting through the trees 🌙",
+    "sparkly forest rave 🍄",
+  ];
+  if (npText) npText.textContent = pick(playlist);
+
+  // ---------- Music gate ----------
+  async function tryPlayMusic() {
+    if (!bgm) return;
+    try { await bgm.play(); } catch {}
   }
-}
 
-/* -------------------------
-   Forest Scene
--------------------------- */
-#scene {
-  position: relative;
-  width: 100%;
-  height: 420px;
-  margin: 24px 0;
-  border-radius: 20px;
-  overflow: hidden;
-  border: 1px solid rgba(255,255,255,0.18);
-  background: rgba(0,0,0,0.15);
-}
+  function closeOverlay() {
+    if (!enterOverlay) return;
+    enterOverlay.classList.add("hidden"); // styles.css must include .overlay.hidden { display:none; }
+  }
 
-#sceneLayer {
-  position: absolute;
-  inset: 0;
-}
+  if (enterBtn) {
+    enterBtn.addEventListener("click", async () => {
+      if (bgm) bgm.muted = false;
+      await tryPlayMusic();
+      closeOverlay();
+      bootScene();
+    });
+  }
 
-/* -------------------------
-   Mushrooms
--------------------------- */
-.mushroom {
-  position: absolute;
-  width: 84px;
-  pointer-events: none;
-  user-select: none;
-  filter: drop-shadow(0 10px 10px rgba(0,0,0,0.35));
-}
+  if (muteBtn) {
+    muteBtn.addEventListener("click", () => {
+      if (bgm) bgm.muted = true;
+      closeOverlay();
+      bootScene();
+    });
+  }
 
-/* -------------------------
-   Kitty sprites
--------------------------- */
-.kitty {
-  position: absolute;
-  width: 96px;
-  height: 96px;
-  pointer-events: none;
-  user-select: none;
-  transform-origin: 50% 80%;
-  filter: drop-shadow(0 14px 12px rgba(0,0,0,0.45));
-}
+  if (toggleMusicBtn) {
+    toggleMusicBtn.addEventListener("click", async () => {
+      if (!bgm) return;
+      if (bgm.paused) {
+        bgm.muted = false;
+        await tryPlayMusic();
+      } else {
+        bgm.pause();
+      }
+    });
+  }
 
-/* Facing direction */
-.kitty {
-  transform: scaleX(var(--facing, 1));
-}
+  // ---------- Scene assets (your repo paths) ----------
+  const MUSHROOMS = [
+    "assets/mushrooms/amanita.png",
+    "assets/mushrooms/balloon.png",
+    "assets/mushrooms/spiral.png",
+    "assets/mushrooms/group.png",
+    "assets/mushrooms/long.png",
+    "assets/mushrooms/basic.png",
+    "assets/mushrooms/oyster.png",
+    "assets/mushrooms/hen_of_woods.png",
+    "assets/mushrooms/elfin_saddle.png",
+    "assets/mushrooms/chanterelle.png",
+  ];
 
-/* -------------------------
-   Sprite animations (8-frame sheets)
--------------------------- */
-@keyframes run {
-  to { background-position: 100% 0; }
-}
+  const CATS = {
+    orange: { runClass: "kitty orange run", idleClass: "kitty orange idle" },
+    black:  { runClass: "kitty black run",  idleClass: "kitty black idle"  },
+    grey:   { runClass: "kitty grey walk",  idleClass: "kitty grey idle"   },
+  };
 
-@keyframes bob {
-  0%,100% { translate: 0 0; }
-  50% { translate: 0 -2px; }
-}
+  // ---------- Scene state ----------
+  const state = {
+    mushrooms: [], // { el, placedRect }
+    cats: [],      // kitty objects
+    started: false,
+    chaseCooldown: 0,
+  };
 
-@keyframes hop {
-  0% { translate: 0 0; }
-  60% { translate: 0 -18px; }
-  100% { translate: 0 0; }
-}
+  function clearScene() {
+    if (!sceneLayer) return;
+    sceneLayer.innerHTML = "";
+    state.mushrooms = [];
+    state.cats = [];
+  }
 
-/* ORANGE */
-.kitty.orange.run {
-  background: url("assets/cats/orange_run.png") 0 0 / 800% 100% no-repeat;
-  animation: run 700ms steps(8) infinite;
-}
-.kitty.orange.idle {
-  background: url("assets/cats/orange_stretch.png") 0 0 / 800% 100% no-repeat;
-  animation: run 1200ms steps(8) infinite;
-}
+  function sceneDims() {
+    const r = scene.getBoundingClientRect();
+    return { w: r.width, h: r.height };
+  }
 
-/* BLACK */
-.kitty.black.run {
-  background: url("assets/cats/black_run.png") 0 0 / 800% 100% no-repeat;
-  animation: run 620ms steps(8) infinite;
-}
-.kitty.black.idle {
-  background: url("assets/cats/black_idle.png") center / contain no-repeat;
-  animation: bob 500ms ease-in-out infinite;
-}
+  function rectInScene(el) {
+    const sr = scene.getBoundingClientRect();
+    const r = el.getBoundingClientRect();
+    return { x: r.left - sr.left, y: r.top - sr.top, w: r.width, h: r.height };
+  }
 
-/* GREY */
-.kitty.grey.walk {
-  background: url("assets/cats/grey_walk.png") 0 0 / 800% 100% no-repeat;
-  animation: run 1000ms steps(8) infinite;
-}
-.kitty.grey.sleep {
-  background: url("assets/cats/grey_sleep.png") 0 0 / 800% 100% no-repeat;
-  animation: run 1400ms steps(8) infinite;
-}
-.kitty.grey.hiss {
-  background: url("assets/cats/grey_hiss.png") 0 0 / 800% 100% no-repeat;
-  animation: run 800ms steps(8) infinite;
-}
-.kitty.grey.idle {
-  background: url("assets/cats/grey_idle.png") center / contain no-repeat;
-  animation: bob 900ms ease-in-out infinite;
-}
+  // ---------- Mushrooms (placed in a ground band) ----------
+  function spawnMushrooms(count = 14) {
+    const { w, h } = sceneDims();
+    const groundMin = h * 0.64;
+    const groundMax = h * 0.86;
+    const placed = [];
 
-/* Hop overlay */
-.kitty.hop {
-  animation:
-    hop 260ms ease-out 1,
-    run 700ms steps(8) infinite;
-}
+    for (let i = 0; i < count; i++) {
+      const img = document.createElement("img");
+      img.className = "mushroom";
+      img.src = pick(MUSHROOMS);
+      img.alt = "mushroom";
+      img.style.left = "0px";
+      img.style.top = "0px";
+      sceneLayer.appendChild(img);
 
-/* -------------------------
-   Footer
--------------------------- */
-.footer {
-  margin-top: 40px;
-  text-align: center;
-  font-size: 12px;
-  color: var(--muted);
-}
+      img.onload = () => {
+        const mw = img.naturalWidth ? clamp(img.naturalWidth * 0.25, 50, 110) : 84;
+        img.style.width = `${mw}px`;
+
+        let tries = 60;
+        while (tries-- > 0) {
+          const x = rand(20, w - mw - 20);
+          const y = rand(groundMin, groundMax);
+          img.style.left = `${x}px`;
+          img.style.top = `${y}px`;
+
+          const r = rectInScene(img);
+          const hit = placed.some(pr => intersects(r, pr));
+          if (!hit) {
+            placed.push(r);
+            state.mushrooms.push({ el: img, rect: r });
+            break;
+          }
+        }
+
+        // If we failed to find a non-overlapping spot, still keep it
+        if (!state.mushrooms.find(m => m.el === img)) {
+          state.mushrooms.push({ el: img, rect: rectInScene(img) });
+        }
+      };
+    }
+  }
+
+  // ---------- Kitties ----------
+  function makeKitty(kind, x, y) {
+    const el = document.createElement("div");
+    el.className = CATS[kind].runClass;
+    el.style.left = `${x}px`;
+    el.style.top = `${y}px`;
+    el.style.setProperty("--facing", "1");
+    sceneLayer.appendChild(el);
+
+    return {
+      kind,
+      el,
+      x, y,
+      vx: rand(0.9, 1.6) * (Math.random() < 0.5 ? -1 : 1),
+      mode: "roam", // roam | chase | idle | sleep | hiss
+      modeT: 0,
+      target: null,
+      lastHopAt: 0,
+      speedMul: 1,
+    };
+  }
+
+  function spawnKitties() {
+    const { w, h } = sceneDims();
+    const baseY = h * 0.74;
+
+    state.cats.push(makeKitty("orange", w * 0.20, baseY));
+    state.cats.push(makeKitty("black",  w * 0.55, baseY + 10));
+    state.cats.push(makeKitty("grey",   w * 0.40, baseY + 18));
+
+    // grey starts calm
+    const grey = state.cats.find(c => c.kind === "grey");
+    if (grey) {
+      grey.mode = "idle";
+      grey.modeT = 220;
+      grey.el.className = CATS.grey.idleClass;
+    }
+  }
+
+  function updateKitty(k, dt) {
+    const { w, h } = sceneDims();
+
+    // personality speed
+    k.speedMul =
+      k.kind === "black" ? 1.25 :
+      k.kind === "grey"  ? 0.85 :
+                           1.00;
+
+    if (k.modeT > 0) k.modeT -= dt;
+
+    // grey special modes occasionally
+    if (k.kind === "grey" && k.modeT <= 0 && Math.random() < 0.003) {
+      k.mode = pick(["idle", "sleep", "hiss"]);
+      k.modeT = randi(160, 320);
+      k.el.className =
+        k.mode === "sleep" ? "kitty grey sleep" :
+        k.mode === "hiss"  ? "kitty grey hiss"  :
+                             "kitty grey idle";
+    }
+
+    // if grey is special-mode: barely moves
+    if (k.kind === "grey" && (k.mode === "sleep" || k.mode === "idle" || k.mode === "hiss")) {
+      k.vx *= 0.92;
+      k.x += (k.vx * 0.10) * dt;
+      k.x = clamp(k.x, 10, w - 110);
+      k.el.style.left = `${k.x}px`;
+      return;
+    }
+
+    // base class while moving
+    if (k.kind === "grey") k.el.className = "kitty grey walk";
+    else if (k.kind === "black") k.el.className = "kitty black run";
+    else k.el.className = "kitty orange run";
+
+    // chase logic
+    if (k.mode === "chase" && k.target) {
+      const dx = (k.target.x ?? k.target) - k.x;
+      k.vx = clamp(dx * 0.02, -3.2, 3.2);
+    } else {
+      // gentle wander
+      k.vx += rand(-0.02, 0.02) * dt;
+      k.vx = clamp(k.vx, -2.2, 2.2);
+    }
+
+    // build kitty collision rect (lower half)
+    const kRect = { x: k.x + 10, y: k.y + 36, w: 66, h: 44 };
+
+    // find nearest mushroom rect
+    let nearest = null;
+    let nearestD2 = Infinity;
+    for (const m of state.mushrooms) {
+      const mr = rectInScene(m.el);
+      const dx = (mr.x + mr.w / 2) - (kRect.x + kRect.w / 2);
+      const dy = (mr.y + mr.h / 2) - (kRect.y + kRect.h / 2);
+      const d2 = dx * dx + dy * dy;
+      if (d2 < nearestD2) { nearestD2 = d2; nearest = mr; }
+    }
+
+    // avoid + hop
+    if (nearest && nearestD2 < 220 * 220) {
+      const centerK = kRect.x + kRect.w / 2;
+      const centerM = nearest.x + nearest.w / 2;
+      const away = centerK - centerM;
+
+      // steer away
+      k.vx += clamp(away * 0.0008, -0.5, 0.5) * dt;
+
+      // hop if colliding
+      const willHit = intersects(
+        kRect,
+        { x: nearest.x + 6, y: nearest.y + 16, w: nearest.w - 12, h: nearest.h - 16 }
+      );
+
+      const now = performance.now();
+      if (willHit && now - k.lastHopAt > 800) {
+        k.lastHopAt = now;
+        k.el.classList.add("hop");
+        setTimeout(() => k.el.classList.remove("hop"), 260);
+        k.vx += (k.vx >= 0 ? 0.8 : -0.8);
+      }
+    }
+
+    // move
+    const speed = k.vx * k.speedMul;
+    k.x += speed * dt * 0.06;
+
+    // edges
+    if (k.x < 8) { k.x = 8; k.vx *= -1; }
+    if (k.x > w - 110) { k.x = w - 110; k.vx *= -1; }
+
+    // face direction
+    k.el.style.setProperty("--facing", speed >= 0 ? "1" : "-1");
+
+    // ground
+    const groundY = h * 0.74 + (k.kind === "black" ? 8 : 0) + (k.kind === "grey" ? 18 : 0);
+    k.y = groundY;
+
+    k.el.style.left = `${k.x}px`;
+    k.el.style.top = `${k.y}px`;
+  }
+
+  // occasional cutscene: black chases orange
+  function maybeStartChase(dt) {
+    if (state.chaseCooldown > 0) {
+      state.chaseCooldown -= dt;
+      return;
+    }
+    if (Math.random() < 0.0025) {
+      const orange = state.cats.find(c => c.kind === "orange");
+      const black = state.cats.find(c => c.kind === "black");
+      if (!orange || !black) return;
+
+      black.mode = "chase";
+      black.target = orange;
+      black.modeT = randi(140, 260);
+
+      // orange flees a bit
+      orange.mode = "chase";
+      orange.target = { x: orange.x + (orange.x < (sceneDims().w / 2) ? 260 : -260) };
+      orange.modeT = black.modeT;
+
+      state.chaseCooldown = randi(420, 700);
+    }
+  }
+
+  // ---------- Loop ----------
+  let lastT = 0;
+  function tick(t) {
+    if (!state.started) return;
+    const dt = Math.min(32, t - lastT || 16);
+    lastT = t;
+
+    maybeStartChase(dt);
+
+    for (const k of state.cats) {
+      if (k.mode === "chase" && k.modeT <= 0) {
+        k.mode = "roam";
+        k.target = null;
+      }
+      updateKitty(k, dt);
+    }
+
+    requestAnimationFrame(tick);
+  }
+
+  function bootScene() {
+    if (state.started) return;
+    if (!scene || !sceneLayer) return;
+
+    state.started = true;
+    clearScene();
+
+    const w = sceneDims().w;
+    const mushCount = w < 650 ? 10 : 16;
+
+    spawnMushrooms(mushCount);
+    spawnKitties();
+
+    requestAnimationFrame((t) => {
+      lastT = t;
+      requestAnimationFrame(tick);
+    });
+  }
+
+  // ---------- Dragon game wiring (SHOW PNGs) ----------
+  // Your repo folder: assets/dragons/*.png
+  const DRAGONS = {
+    ember: "assets/dragons/ember.png",
+    storm: "assets/dragons/storm.png", // if missing, we’ll show fallback text
+    moss:  "assets/dragons/moss.png",
+  };
+
+  let selectedDragon = null;
+  let selectedTreat = null;
+
+  // inject a dragon panel into Step 3
+  let dragonPanel = null;
+  function ensureDragonPanel() {
+    if (dragonPanel) return dragonPanel;
+    if (!stepResult) return null;
+
+    const wrap = document.createElement("div");
+    wrap.style.marginTop = "12px";
+    wrap.style.display = "grid";
+    wrap.style.gap = "10px";
+
+    const img = document.createElement("img");
+    img.alt = "dragon";
+    img.style.width = "min(360px, 100%)";
+    img.style.borderRadius = "16px";
+    img.style.border = "1px solid rgba(255,255,255,0.18)";
+    img.style.boxShadow = "0 14px 40px rgba(0,0,0,0.35)";
+    img.style.background = "rgba(0,0,0,0.25)";
+    img.loading = "lazy";
+
+    const note = document.createElement("div");
+    note.className = "tiny";
+    note.textContent = "";
+
+    wrap.appendChild(img);
+    wrap.appendChild(note);
+    stepResult.appendChild(wrap);
+
+    dragonPanel = { wrap, img, note };
+    return dragonPanel;
+  }
+
+  function showStep(stepEl) {
+    [stepPickDragon, stepPickTreat, stepResult].forEach((s) => s && s.classList.add("hidden"));
+    stepEl && stepEl.classList.remove("hidden");
+  }
+
+  function outcome(_dragon, treat) {
+    if (treat === "spicyJerky") return "fire";
+    if (treat === "stardustBerry") return "wings";
+    return "bite";
+  }
+
+  function renderResult() {
+    const out = outcome(selectedDragon, selectedTreat);
+
+    if (rideRow) rideRow.classList.add("hidden");
+
+    if (out === "fire") {
+      if (resultText) resultText.textContent = "Your dragon learns FIRE BREATH 🔥 (iconic).";
+    } else if (out === "wings") {
+      if (resultText) resultText.textContent = "Your dragon grows WINGS 🪽. You may now ride.";
+      if (rideRow) rideRow.classList.remove("hidden");
+    } else {
+      if (resultText) resultText.textContent = "Your dragon BITES you. Not hard. Just disrespectfully.";
+    }
+
+    const panel = ensureDragonPanel();
+    if (panel) {
+      const src = DRAGONS[selectedDragon] || "";
+      panel.img.src = src;
+
+      // if file missing, show friendly note
+      panel.img.onerror = () => {
+        panel.note.innerHTML =
+          `Couldn’t load <code>${src}</code>.<br>` +
+          `Make sure your dragon PNG exists at <code>assets/dragons/${selectedDragon}.png</code> (or update DRAGONS paths).`;
+      };
+
+      panel.note.innerHTML =
+        `<div><strong>${(selectedDragon || "").toUpperCase()}</strong> dragon chosen.</div>` +
+        `<div>Treat: <strong>${selectedTreat}</strong></div>`;
+    }
+
+    showStep(stepResult);
+  }
+
+  // bind game buttons
+  document.querySelectorAll("[data-dragon]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      selectedDragon = btn.getAttribute("data-dragon");
+      selectedTreat = null;
+      showStep(stepPickTreat);
+    });
+  });
+
+  document.querySelectorAll("[data-treat]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      selectedTreat = btn.getAttribute("data-treat");
+      renderResult();
+    });
+  });
+
+  if (resetBtn) {
+    resetBtn.addEventListener("click", () => {
+      selectedDragon = null;
+      selectedTreat = null;
+      showStep(stepPickDragon);
+    });
+  }
+
+  if (rideBtn) {
+    rideBtn.addEventListener("click", () => {
+      alert("You ride into the night sky like a tiny legendary icon. ✨🪽🐉");
+    });
+  }
+
+})(); // end IIFE
