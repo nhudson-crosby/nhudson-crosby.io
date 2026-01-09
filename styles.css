@@ -1,279 +1,342 @@
-/* =========================================================
-   Nikita’s Forestspace
-   MySpace-inspired interactive forest
-   FULL styles.css
-   ========================================================= */
-
-/* -------------------------
-   Variables
--------------------------- */
-:root {
-  --panel-bg: rgba(10, 18, 14, 0.72);
-  --panel-border: rgba(160, 255, 200, 0.30);
+:root{
+  --bg: #0a0f0c;
+  --card: rgba(20, 30, 25, 0.78);
+  --card2: rgba(20, 30, 25, 0.60);
+  --stroke: rgba(180, 255, 210, 0.18);
   --text: #eafff2;
-  --muted: rgba(234, 255, 242, 0.75);
+  --muted: rgba(234,255,242,0.72);
   --accent: #ff7bd1;
   --accent2: #8cffc2;
-  --shadow: rgba(0, 0, 0, 0.45);
 
+  /* YOUR REAL PATH */
   --cursor-url: url("assets/cursor/cursor.png");
 }
 
-/* -------------------------
-   Base reset
--------------------------- */
-* { box-sizing: border-box; }
-
-html, body {
-  margin: 0;
-  padding: 0;
-  min-height: 100%;
-}
-
-body {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont,
-    "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell,
-    "Helvetica Neue", Arial, sans-serif;
-
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{
   color: var(--text);
-
-  /* 🌲 Forest background */
-  background:
-    linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.65)),
-    url("assets/ui/bg-forest.png") center / cover fixed no-repeat;
-
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  background: radial-gradient(1200px 800px at 40% 0%, rgba(50,120,80,0.25), transparent 70%),
+              radial-gradient(900px 600px at 90% 20%, rgba(255,123,209,0.10), transparent 60%),
+              var(--bg);
   cursor: var(--cursor-url) 6 2, auto;
-  overflow-x: hidden;
 }
 
-/* -------------------------
-   Main container
--------------------------- */
-.container {
-  position: relative;
-  z-index: 2;
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 24px 16px 80px;
+a{color: var(--accent2); text-decoration:none}
+a:hover{text-decoration:underline}
+
+.container{
+  width: min(1100px, calc(100% - 28px));
+  margin: 18px auto 40px;
 }
 
-/* -------------------------
-   Overlay (Enter gate)
--------------------------- */
-.overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.65);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 999;
-}
+.hidden{display:none !important}
 
-.overlay.hidden {
-  display: none;
-}
+.tiny{font-size:12px;color:var(--muted);line-height:1.35}
+.divider{height:1px;background:rgba(255,255,255,0.08);margin:12px 0}
 
-.overlayCard {
-  width: min(560px, calc(100% - 32px));
-  padding: 22px;
-  border-radius: 20px;
-  background: rgba(10, 18, 14, 0.92);
-  border: 1px solid rgba(255,255,255,0.15);
-  box-shadow: 0 20px 80px rgba(0,0,0,0.6);
-  text-align: center;
-}
-
-.enterActions {
-  display: flex;
-  gap: 12px;
-  justify-content: center;
-  margin-top: 16px;
-}
-
-/* -------------------------
-   Buttons
--------------------------- */
-button {
-  appearance: none;
-  border: 1px solid rgba(255,255,255,0.18);
-  background: rgba(0,0,0,0.45);
-  color: var(--text);
-  padding: 10px 16px;
-  border-radius: 14px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: transform 120ms ease, filter 120ms ease;
-}
-
-button:hover {
-  transform: translateY(-1px);
-  filter: brightness(1.1);
-}
-
-button.secondary {
-  opacity: 0.85;
-}
-
-/* -------------------------
-   Typography
--------------------------- */
-h1, h2, h3, h4 {
-  margin: 0 0 10px 0;
-  font-weight: 600;
-}
-
-.tiny {
-  font-size: 12px;
-  color: var(--muted);
-}
-
-/* -------------------------
-   Cards
--------------------------- */
-.card {
-  background: var(--panel-bg);
-  border: 1px solid var(--panel-border);
-  border-radius: 20px;
-  padding: 18px;
-  box-shadow: 0 14px 40px var(--shadow);
+/* ---------- Header ---------- */
+.profileHeader{
+  background: var(--card2);
+  border: 1px solid var(--stroke);
+  border-radius: 18px;
+  padding: 14px;
+  box-shadow: 0 18px 60px rgba(0,0,0,0.35);
   backdrop-filter: blur(10px);
 }
 
-.card.wide {
-  grid-column: span 2;
+.headerTop{
+  display:flex; justify-content:space-between; align-items:center; gap:10px;
+  margin-bottom: 6px;
 }
 
-@media (max-width: 900px) {
-  .card.wide { grid-column: span 1; }
+.badge{
+  font-size:12px;
+  padding:6px 10px;
+  border-radius:999px;
+  background: rgba(0,0,0,0.30);
+  border: 1px solid rgba(255,255,255,0.10);
 }
 
-/* -------------------------
-   Grid layout
--------------------------- */
-.grid {
+.nowPlaying{display:flex; align-items:center; gap:8px; flex-wrap:wrap}
+.npLabel{font-size:12px; color: var(--muted)}
+.npText{font-size:12px}
+
+.miniBtn{
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(0,0,0,0.25);
+  color: var(--text);
+  padding: 6px 10px;
+  border-radius: 12px;
+  cursor:pointer;
+}
+
+.status{margin:8px 0 10px;color:var(--muted)}
+.sparkle{color:var(--accent2); text-shadow:0 0 10px rgba(140,255,194,0.25)}
+
+.marqueeWrap{
+  overflow:hidden;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(0,0,0,0.18);
+}
+.marquee{
+  white-space:nowrap;
+  padding: 8px 10px;
+  animation: scroll 14s linear infinite;
+  font-size: 12px;
+  color: rgba(234,255,242,0.75);
+}
+@keyframes scroll{
+  from{transform:translateX(0)}
+  to{transform:translateX(-50%)}
+}
+
+/* ---------- Cards/Grid ---------- */
+.grid{
+  display:grid;
+  grid-template-columns: 1.25fr 0.75fr;
+  gap: 14px;
+  margin-top: 14px;
+}
+@media (max-width: 900px){
+  .grid{grid-template-columns:1fr}
+}
+
+.card{
+  background: var(--card);
+  border: 1px solid var(--stroke);
+  border-radius: 18px;
+  padding: 14px;
+  box-shadow: 0 18px 60px rgba(0,0,0,0.35);
+  backdrop-filter: blur(10px);
+}
+.card.wide{grid-column: 1 / -1}
+
+.profileFacts .factRow{margin:6px 0; color: var(--muted)}
+.profileFacts .factRow span{color: var(--text); font-weight:600}
+
+.blinkiesGrid{display:flex; gap:8px; flex-wrap:wrap}
+.blinkie{
+  font-size:12px;
+  padding: 6px 10px;
+  border-radius:999px;
+  border: 1px dashed rgba(255,255,255,0.18);
+  background: rgba(0,0,0,0.22);
+}
+.blinkie.alt{border-style:solid; opacity:0.9}
+
+.linkList{margin:0;padding-left:18px}
+.linkList li{margin: 6px 0}
+
+.thriftGrid{display:grid; gap:10px}
+.thriftRow{
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(0,0,0,0.18);
+  color: rgba(234,255,242,0.80);
+}
+.thriftRow span{color: rgba(234,255,242,0.70); margin-right: 8px}
+
+.top8Grid{
+  display:grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+@media (max-width: 900px){
+  .top8Grid{grid-template-columns: repeat(2, 1fr)}
+}
+.top8Card{
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(0,0,0,0.18);
+  color: rgba(234,255,242,0.80);
+}
+
+/* ---------- Overlay ---------- */
+.overlay{
+  position: fixed;
+  inset: 0;
   display: grid;
-  grid-template-columns: 1.4fr 1fr;
-  gap: 16px;
+  place-items: center;
+  z-index: 9999;
+  background: rgba(0,0,0,0.60);
 }
-
-@media (max-width: 900px) {
-  .grid { grid-template-columns: 1fr; }
+.overlayCard{
+  width: min(640px, calc(100% - 28px));
+  padding: 18px;
+  border-radius: 18px;
+  background: rgba(14, 22, 17, 0.92);
+  border: 1px solid rgba(255,255,255,0.14);
+  box-shadow: 0 18px 80px rgba(0,0,0,0.55);
 }
+.blinkiesRow{display:flex; gap:10px; flex-wrap:wrap; margin-bottom: 10px}
+.enterActions{display:flex; gap:10px; margin: 12px 0}
 
-/* -------------------------
-   Forest Scene
--------------------------- */
-#scene {
+button{
+  border: 1px solid rgba(255,255,255,0.14);
+  background: rgba(255,123,209,0.20);
+  color: var(--text);
+  padding: 10px 14px;
+  border-radius: 14px;
+  cursor:pointer;
+}
+button.secondary{
+  background: rgba(0,0,0,0.25);
+}
+button:hover{filter:brightness(1.08)}
+
+/* ---------- FOREST SCENE (IMPORTANT FIXES) ---------- */
+#scene{
   position: relative;
   width: 100%;
   height: 420px;
-  margin: 24px 0;
-  border-radius: 20px;
+  margin-top: 10px;
+  border-radius: 18px;
   overflow: hidden;
-  border: 1px solid rgba(255,255,255,0.18);
-  background: rgba(0,0,0,0.15);
+  border: 1px solid rgba(255,255,255,0.14);
+
+  /* YOUR REAL PATH */
+  background-image: url("assets/ui/bg-forest.png");
+  background-size: cover;
+  background-position: center bottom;
+  background-repeat: no-repeat;
 }
 
-#sceneLayer {
-  position: absolute;
-  inset: 0;
+/* This layer MUST be transparent */
+#sceneLayer{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background: transparent;
 }
 
-/* -------------------------
-   Mushrooms
--------------------------- */
-.mushroom {
-  position: absolute;
-  width: 84px;
-  pointer-events: none;
-  user-select: none;
-  filter: drop-shadow(0 10px 10px rgba(0,0,0,0.35));
+/* mushrooms are IMG elements */
+.mushroom{
+  position:absolute;
+  height:auto;
+  user-select:none;
+  pointer-events:none;
+  filter: drop-shadow(0 10px 10px rgba(0,0,0,0.25));
 }
 
-/* -------------------------
-   Kitty sprites
--------------------------- */
-.kitty {
-  position: absolute;
-  width: 96px;
-  height: 96px;
-  pointer-events: none;
-  user-select: none;
+/* cats are DIVs using background spritesheets */
+.kitty{
+  position:absolute;
+  width: 112px;
+  height: 112px;
+  pointer-events:none;
+  user-select:none;
   transform-origin: 50% 80%;
-  filter: drop-shadow(0 14px 12px rgba(0,0,0,0.45));
+  filter: drop-shadow(0 12px 10px rgba(0,0,0,0.35));
   transform: scaleX(var(--facing, 1));
 }
 
-/* -------------------------
-   Sprite animations
--------------------------- */
-@keyframes run {
-  to { background-position: 100% 0; }
-}
-
-@keyframes bob {
-  0%,100% { translate: 0 0; }
-  50% { translate: 0 -2px; }
-}
-
-@keyframes hop {
-  0% { translate: 0 0; }
-  60% { translate: 0 -18px; }
-  100% { translate: 0 0; }
-}
-
-/* ORANGE */
-.kitty.orange.run {
+/* 8-frame sheets => 800% width */
+.kitty.orange.run{
   background: url("assets/cats/orange_run.png") 0 0 / 800% 100% no-repeat;
   animation: run 700ms steps(8) infinite;
 }
-.kitty.orange.idle {
+.kitty.orange.idle{
   background: url("assets/cats/orange_stretch.png") 0 0 / 800% 100% no-repeat;
   animation: run 1200ms steps(8) infinite;
 }
 
-/* BLACK */
-.kitty.black.run {
+.kitty.black.run{
   background: url("assets/cats/black_run.png") 0 0 / 800% 100% no-repeat;
   animation: run 620ms steps(8) infinite;
 }
-.kitty.black.idle {
+.kitty.black.idle{
   background: url("assets/cats/black_idle.png") center / contain no-repeat;
-  animation: bob 500ms ease-in-out infinite;
+  animation: kittyBob 520ms ease-in-out infinite;
 }
 
-/* GREY */
-.kitty.grey.walk {
+.kitty.grey.walk{
   background: url("assets/cats/grey_walk.png") 0 0 / 800% 100% no-repeat;
   animation: run 1000ms steps(8) infinite;
 }
-.kitty.grey.sleep {
+.kitty.grey.sleep{
   background: url("assets/cats/grey_sleep.png") 0 0 / 800% 100% no-repeat;
   animation: run 1400ms steps(8) infinite;
 }
-.kitty.grey.hiss {
+.kitty.grey.hiss{
   background: url("assets/cats/grey_hiss.png") 0 0 / 800% 100% no-repeat;
   animation: run 800ms steps(8) infinite;
 }
-.kitty.grey.idle {
+.kitty.grey.idle{
   background: url("assets/cats/grey_idle.png") center / contain no-repeat;
-  animation: bob 900ms ease-in-out infinite;
+  animation: kittyBob 900ms ease-in-out infinite;
 }
 
-/* Hop overlay */
-.kitty.hop {
-  animation:
-    hop 260ms ease-out 1,
-    run 700ms steps(8) infinite;
+/* hop overlay */
+.kitty.hop{
+  animation-name: hopBob, run;
+  animation-duration: 240ms, 700ms;
+  animation-iteration-count: 1, infinite;
+  animation-timing-function: ease-out, steps(8);
 }
 
-/* -------------------------
-   Footer
--------------------------- */
-.footer {
-  margin-top: 40px;
-  text-align: center;
+@keyframes run{ to{ background-position: 100% 0; } }
+@keyframes kittyBob{
+  0%,100%{ translate: 0 0; }
+  50%{ translate: 0 -2px; }
+}
+@keyframes hopBob{
+  0%{ translate: 0 0; }
+  60%{ translate: 0 -18px; }
+  100%{ translate: 0 0; }
+}
+
+/* ---------- Dragon game ---------- */
+.gameWrap{
+  margin-top: 10px;
+  padding: 12px;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(0,0,0,0.18);
+}
+.choices{display:flex; gap:10px; flex-wrap:wrap; margin: 10px 0}
+.chip{
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: rgba(0,0,0,0.25);
+  border: 1px solid rgba(255,255,255,0.14);
+}
+.chip.secondary{opacity:0.85}
+
+.resultText{margin: 8px 0 6px; font-weight: 600}
+
+.dragonStage{
+  display:flex;
+  gap: 12px;
+  align-items:center;
+  flex-wrap:wrap;
+  margin-bottom: 10px;
+}
+.dragonCard{
+  width: 120px;
+  height: 120px;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(0,0,0,0.25);
+  display:grid;
+  place-items:center;
+  overflow:hidden;
+}
+.dragonCard img{
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display:block;
+}
+
+/* ---------- Footer ---------- */
+.footer{
+  margin-top: 14px;
+  text-align:center;
+  color: rgba(234,255,242,0.65);
   font-size: 12px;
-  color: var(--muted);
 }
