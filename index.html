@@ -6,11 +6,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="styles.css" />
 </head>
-<body>
 
+<body>
   <!-- ENTER OVERLAY (required for audio in modern browsers) -->
   <div id="enterOverlay" class="overlay">
-    <div class="overlayCard glitter-hover">
+    <div class="overlayCard">
       <div class="blinkiesRow">
         <span class="blinkie">★ forestspace ★</span>
         <span class="blinkie alt">ONLINE</span>
@@ -18,30 +18,25 @@
       </div>
 
       <h1>🌲 Enter the Forest 🌲</h1>
-      <p class="tiny">
-        Click to enter (music + kitties + glitter).
-      </p>
+      <p class="tiny">Click to enter (music + kitties + glitter).</p>
 
       <div class="enterActions">
-        <button id="enterBtn" class="btn primary">Enter ✨</button>
-        <button id="muteBtn" class="btn" title="Enter with music muted">Enter (Muted)</button>
+        <button id="enterBtn">Enter ✨</button>
+        <button id="muteBtn" class="secondary" title="Enter with music muted">Enter (Muted)</button>
       </div>
 
-      <p class="tiny">
-        Tip: Autoplay is blocked unless you click. This click is the ritual.
-      </p>
+      <p class="tiny">Tip: Autoplay is blocked unless you click. This click is the ritual.</p>
     </div>
   </div>
 
-  <!-- BACKGROUND MUSIC (use your own licensed audio) -->
+  <!-- BACKGROUND MUSIC (optional) -->
   <audio id="bgm" loop preload="auto">
-    <!-- Put a file at /assets/music.mp3 (your own / licensed) -->
+    <!-- If you don't have this, it won't break anything -->
     <source src="assets/music.mp3" type="audio/mpeg">
   </audio>
 
   <main class="container">
-
-    <header class="profileHeader glitter-hover">
+    <header class="profileHeader">
       <div class="headerTop">
         <span class="badge">✨ ONLINE NOW ✨</span>
 
@@ -53,9 +48,7 @@
       </div>
 
       <h2>Nikita’s Forestspace</h2>
-      <p class="status">
-        status: <span class="sparkle">in my mushroom era 🍄</span>
-      </p>
+      <p class="status">status: <span class="sparkle">in my mushroom era 🍄</span></p>
 
       <div class="marqueeWrap">
         <div class="marquee">
@@ -64,12 +57,13 @@
       </div>
     </header>
 
-    <!-- FOREST SCENE (kitties + mushrooms) -->
-    <section class="card wide glitter-hover">
+    <!-- FOREST SCENE CARD -->
+    <section class="card wide">
       <h3>🌲 Forest Scene</h3>
       <p class="tiny">The kitties avoid mushrooms (mostly) and hop over obstacles. Sometimes chaos happens.</p>
 
-      <div id="scene">
+      <div id="scene" aria-label="forest scene">
+        <!-- This layer is where JS spawns sprites -->
         <div id="sceneLayer" class="layer"></div>
       </div>
 
@@ -77,13 +71,12 @@
     </section>
 
     <section class="grid">
-
       <!-- LEFT COLUMN -->
-      <div class="card glitter-hover">
+      <div class="card">
         <h3>About Me</h3>
         <p>
           Welcome to my enchanted forest profile. If you see the orange kitty sprinting between trees,
-          that’s me. The black kitty is the chaos friend. The grey-and-white kitty is the wise, cranky elder.
+          that’s me. The black kitty is the chaos friend. The fluffy kitty is the wise, cranky, elder.
         </p>
 
         <div class="divider"></div>
@@ -97,15 +90,11 @@
         <div class="divider"></div>
 
         <p class="tiny">
-          Guestbook: open an Issue on this repo (very 2026 Myspace).
-        </p>
-        <p class="tiny">
-          <a href="https://github.com/nhudson-crosby/nhudson-crosby.io/issues/new?title=Guestbook:%20I%20visited%20Forestspace&body=Name:%0AFavorite%20mushroom:%0AFavorite%20kitty:%0A2010%20song%20rec:%0A%0A✨%20Leaving%20sparkles%20behind..."
-             target="_blank" rel="noreferrer">[ Sign the Guestbook ]</a>
+          Leave a note in my “Guestbook”: open an Issue on this repo (very 2026 Myspace).
         </p>
       </div>
 
-      <div class="card glitter-hover">
+      <div class="card">
         <h3>Blinkies + Links</h3>
 
         <div class="blinkiesGrid">
@@ -124,16 +113,10 @@
           <li><a href="#game">★ Dragon Treat Game</a></li>
           <li><a href="#top8">★ Top 8 Thrift Finds</a></li>
         </ul>
-
-        <div class="divider"></div>
-
-        <p class="tiny">
-          Pro tip: hover over everything. The glitter is aggressive.
-        </p>
       </div>
 
       <!-- THRIFT MODULE -->
-      <div class="card wide glitter-hover" id="thrift">
+      <div class="card wide" id="thrift">
         <h3>🧥 Vintage Loving / Thrifting</h3>
 
         <div class="thriftGrid">
@@ -157,15 +140,11 @@
             <div class="top8Card">7) antique-looking mirror</div>
             <div class="top8Card">8) retro handbag</div>
           </div>
-
-          <p class="tiny">
-            Want this to be editable? (We can add the local “Add a find” form next.)
-          </p>
         </div>
       </div>
 
       <!-- DRAGON GAME -->
-      <div class="card wide glitter-hover" id="game">
+      <div class="card wide" id="game">
         <h3>🐉 Dragon Treat Training Game</h3>
         <p class="tiny">Pick an egg. Feed treats. Your choices decide if your dragon breathes fire, grows wings, or bites you (rude).</p>
 
@@ -173,47 +152,44 @@
           <div class="gameStep" id="stepPickDragon">
             <p><strong>Step 1:</strong> Choose a dragon egg</p>
             <div class="choices">
-              <button class="btn" data-dragon="ember">Ember Egg</button>
-              <button class="btn" data-dragon="storm">Storm Egg</button>
-              <button class="btn" data-dragon="moss">Moss Egg</button>
+              <button class="chip" data-dragon="ember">Ember Egg</button>
+              <button class="chip" data-dragon="storm">Storm Egg</button>
+              <button class="chip" data-dragon="moss">Moss Egg</button>
             </div>
           </div>
 
           <div class="gameStep hidden" id="stepPickTreat">
             <p><strong>Step 2:</strong> Choose a treat</p>
             <div class="choices">
-              <button class="btn" data-treat="spicyJerky">Spicy Jerky</button>
-              <button class="btn" data-treat="stardustBerry">Stardust Berry</button>
-              <button class="btn" data-treat="marshmallow">Toasted Marshmallow</button>
+              <button class="chip" data-treat="spicyJerky">Spicy Jerky</button>
+              <button class="chip" data-treat="stardustBerry">Stardust Berry</button>
+              <button class="chip" data-treat="marshmallow">Toasted Marshmallow</button>
             </div>
           </div>
 
           <div class="gameStep hidden" id="stepResult">
+            <div class="dragonStage">
+              <div class="dragonCard">
+                <img id="dragonImg" alt="dragon" />
+              </div>
+              <div id="dragonMeta" class="tiny">Your dragon will appear here.</div>
+            </div>
+
             <p id="resultText" class="resultText"></p>
 
             <div class="choices hidden" id="rideRow">
-              <button id="rideBtn" class="btn primary">Ride the dragon 🪽</button>
+              <button id="rideBtn" class="chip">Ride the dragon 🪽</button>
             </div>
 
             <div class="choices">
-              <button id="resetBtn" class="btn">Play again</button>
-            </div>
-
-            <div id="sky" class="sky hidden">
-              <div id="dragon" class="dragon">🐉</div>
-              <div id="rider" class="rider">😺</div>
-              <div class="sparkTrail"></div>
+              <button id="resetBtn" class="chip secondary">Play again</button>
             </div>
           </div>
         </div>
       </div>
-
     </section>
 
-    <footer class="footer tiny">
-      ✨ made with glitter + GitHub Pages ✨
-    </footer>
-
+    <footer class="footer">✨ made with glitter + GitHub Pages ✨</footer>
   </main>
 
   <script src="script.js"></script>
