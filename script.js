@@ -1,13 +1,12 @@
-/* Forestspace - script.js (fixed: NO Python allowed in browser) */
-(() => {
+/* Forestspace - script.js (FULL FILE, overlay fix + safe boot) */
+document.addEventListener("DOMContentLoaded", () => {
   const qs = (s) => document.querySelector(s);
   const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
   const rand = (a, b) => a + Math.random() * (b - a);
   const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
-  console.log("✅ script.js loaded");
+  console.log("✅ script.js loaded (DOMContentLoaded)");
 
-  // Elements
   const enterOverlay = qs("#enterOverlay");
   const enterBtn = qs("#enterBtn");
   const muteBtn = qs("#muteBtn");
@@ -16,9 +15,12 @@
   const scene = qs("#scene");
   const sceneLayer = qs("#sceneLayer");
 
-  // -------- Overlay / Music --------
+  // ---- HARD CLOSE overlay (no reliance on CSS) ----
   function closeOverlay() {
-    if (!enterOverlay) return;
+    if (!enterOverlay) {
+      console.warn("❌ #enterOverlay not found");
+      return;
+    }
     enterOverlay.classList.add("hidden");
     enterOverlay.style.display = "none";
     enterOverlay.style.pointerEvents = "none";
@@ -29,32 +31,14 @@
     if (!bgm) return;
     try {
       await bgm.play();
+      console.log("✅ music playing");
     } catch (e) {
-      // autoplay blocked is fine
-      console.log("ℹ️ autoplay blocked (expected)");
+      console.log("ℹ️ autoplay blocked (normal until click gesture)");
     }
   }
 
-  if (enterBtn) {
-    enterBtn.addEventListener("click", async () => {
-      if (bgm) bgm.muted = false;
-      await tryPlay();
-      closeOverlay();
-      bootScene();
-    });
-  }
-
-  if (muteBtn) {
-    muteBtn.addEventListener("click", () => {
-      if (bgm) bgm.muted = true;
-      closeOverlay();
-      bootScene();
-    });
-  }
-
-  // -------- Scene assets --------
+  // ---- Scene assets ----
   const BG = "assets/ui/bg-forest.png";
-
   const MUSHROOMS = [
     "assets/mushrooms/amanita.png",
     "assets/mushrooms/balloon.png",
@@ -68,27 +52,26 @@
     "assets/mushrooms/chanterelle.png",
   ];
 
-  // Helpers for placement
+  function intersects(a, b) {
+    return !(a.x + a.w < b.x || a.x > b.x + b.w || a.y + a.h < b.y || a.y > b.y + b.h);
+  }
+
+  const state = { started: false };
+
+  function sceneDims() {
+    const r = scene.getBoundingClientRect();
+    return { w: r.width, h: r.height };
+  }
+
   function rectInScene(el) {
     const sr = scene.getBoundingClientRect();
     const r = el.getBoundingClientRect();
     return { x: r.left - sr.left, y: r.top - sr.top, w: r.width, h: r.height };
   }
-  function intersects(a, b) {
-    return !(a.x + a.w < b.x || a.x > b.x + b.w || a.y + a.h < b.y || a.y > b.y + b.h);
-  }
-
-  const state = { started: false, mushrooms: [] };
 
   function clearScene() {
     if (!sceneLayer) return;
     sceneLayer.innerHTML = "";
-    state.mushrooms = [];
-  }
-
-  function sceneDims() {
-    const r = scene.getBoundingClientRect();
-    return { w: r.width, h: r.height };
   }
 
   function setBackground() {
@@ -102,7 +85,7 @@
   function spawnMushrooms(count = 12) {
     const { w, h } = sceneDims();
 
-    // Put them on the grass area (upper part of bottom third)
+    // grass band (higher) to avoid stream area
     const yMin = h * 0.62;
     const yMax = h * 0.82;
 
@@ -113,17 +96,18 @@
       img.className = "mushroom";
       img.src = pick(MUSHROOMS);
       img.alt = "mushroom";
-      img.decoding = "async";
-      img.loading = "lazy";
+
+      // give an initial non-zero position so they don't appear stacked while loading
+      img.style.left = `${rand(20, w - 120)}px`;
+      img.style.top = `${rand(yMin, yMax)}px`;
 
       sceneLayer.appendChild(img);
 
       img.onload = () => {
-        // smaller, more natural
         const mw = clamp((img.naturalWidth || 300) * 0.18, 45, 95);
         img.style.width = `${mw}px`;
 
-        let tries = 80;
+        let tries = 90;
         while (tries-- > 0) {
           const x = rand(20, w - mw - 20);
           const y = rand(yMin, yMax);
@@ -131,23 +115,25 @@
           img.style.top = `${y}px`;
 
           const r = rectInScene(img);
-          const hit = placed.some((pr) => intersects(r, pr));
+          const hit = placed.some((p) => intersects(r, p));
           if (!hit) {
             placed.push(r);
             break;
           }
         }
-
-        state.mushrooms.push(img);
       };
+
+      img.onerror = () => console.warn("❌ mushroom failed:", img.src);
     }
   }
 
   function bootScene() {
     if (state.started) return;
+    if (!scene || !sceneLayer) {
+      console.warn("❌ missing #scene or #sceneLayer");
+      return;
+    }
     state.started = true;
-
-    if (!scene || !sceneLayer) return;
 
     clearScene();
     setBackground();
@@ -158,4 +144,22 @@
     console.log("✅ scene booted");
   }
 
-})();
+  // ---- Wire overlay buttons ----
+  if (!enterBtn) console.warn("❌ #enterBtn not found");
+  if (!muteBtn) console.warn("❌ #muteBtn not found");
+
+  enterBtn?.addEventListener("click", async () => {
+    console.log("✅ enter clicked");
+    if (bgm) bgm.muted = false;
+    await tryPlay();
+    closeOverlay();
+    bootScene();
+  });
+
+  muteBtn?.addEventListener("click", () => {
+    console.log("✅ mute clicked");
+    if (bgm) bgm.muted = true;
+    closeOverlay();
+    bootScene();
+  });
+});
