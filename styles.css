@@ -1,233 +1,187 @@
+/* =========================================================
+   Forestspace / Myspace vibes
+   styles.css (FULL FILE)
+   ========================================================= */
+
 :root{
   --bg: #0a0f0c;
   --card: rgba(20, 30, 25, 0.78);
-  --card2: rgba(20, 30, 25, 0.60);
   --stroke: rgba(180, 255, 210, 0.18);
   --text: #eafff2;
-  --muted: rgba(234,255,242,0.72);
+  --muted: rgba(234, 255, 242, 0.72);
   --accent: #ff7bd1;
   --accent2: #8cffc2;
 
-  /* YOUR REAL PATH */
-  --cursor-url: url("assets/cursor/cursor.png");
+  /* ✅ your cursor file */
+  --cursor-url: url("./assets/cursor/cursor.png");
 }
 
-*{box-sizing:border-box}
-html,body{height:100%;margin:0}
+*{ box-sizing: border-box; }
+html,body{ height:100%; margin:0; padding:0; }
+
 body{
   color: var(--text);
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  background: radial-gradient(1200px 800px at 40% 0%, rgba(50,120,80,0.25), transparent 70%),
-              radial-gradient(900px 600px at 90% 20%, rgba(255,123,209,0.10), transparent 60%),
-              var(--bg);
+  background:
+    radial-gradient(1200px 800px at 40% 0%, rgba(50, 120, 80, 0.25), transparent 70%),
+    radial-gradient(900px 600px at 90% 20%, rgba(255, 123, 209, 0.10), transparent 60%),
+    var(--bg);
+
+  /* ✅ custom cursor */
   cursor: var(--cursor-url) 6 2, auto;
 }
 
-a{color: var(--accent2); text-decoration:none}
-a:hover{text-decoration:underline}
+.hidden{ display:none !important; }
+a{ color: var(--accent2); }
+a:hover{ color: var(--accent); }
 
-.container{
-  width: min(1100px, calc(100% - 28px));
-  margin: 18px auto 40px;
-}
-
-.hidden{display:none !important}
-
-.tiny{font-size:12px;color:var(--muted);line-height:1.35}
-.divider{height:1px;background:rgba(255,255,255,0.08);margin:12px 0}
-
-/* ---------- Header ---------- */
-.profileHeader{
-  background: var(--card2);
-  border: 1px solid var(--stroke);
-  border-radius: 18px;
-  padding: 14px;
-  box-shadow: 0 18px 60px rgba(0,0,0,0.35);
-  backdrop-filter: blur(10px);
-}
-
-.headerTop{
-  display:flex; justify-content:space-between; align-items:center; gap:10px;
-  margin-bottom: 6px;
-}
-
-.badge{
-  font-size:12px;
-  padding:6px 10px;
-  border-radius:999px;
-  background: rgba(0,0,0,0.30);
-  border: 1px solid rgba(255,255,255,0.10);
-}
-
-.nowPlaying{display:flex; align-items:center; gap:8px; flex-wrap:wrap}
-.npLabel{font-size:12px; color: var(--muted)}
-.npText{font-size:12px}
-
-.miniBtn{
-  border: 1px solid rgba(255,255,255,0.12);
-  background: rgba(0,0,0,0.25);
-  color: var(--text);
-  padding: 6px 10px;
-  border-radius: 12px;
-  cursor:pointer;
-}
-
-.status{margin:8px 0 10px;color:var(--muted)}
-.sparkle{color:var(--accent2); text-shadow:0 0 10px rgba(140,255,194,0.25)}
-
-.marqueeWrap{
-  overflow:hidden;
-  border-radius: 14px;
-  border: 1px solid rgba(255,255,255,0.08);
-  background: rgba(0,0,0,0.18);
-}
-.marquee{
-  white-space:nowrap;
-  padding: 8px 10px;
-  animation: scroll 14s linear infinite;
+.tiny{
   font-size: 12px;
-  color: rgba(234,255,242,0.75);
-}
-@keyframes scroll{
-  from{transform:translateX(0)}
-  to{transform:translateX(-50%)}
+  color: var(--muted);
+  line-height: 1.35;
 }
 
-/* ---------- Cards/Grid ---------- */
-.grid{
-  display:grid;
-  grid-template-columns: 1.25fr 0.75fr;
-  gap: 14px;
-  margin-top: 14px;
-}
-@media (max-width: 900px){
-  .grid{grid-template-columns:1fr}
-}
-
-.card{
-  background: var(--card);
-  border: 1px solid var(--stroke);
-  border-radius: 18px;
-  padding: 14px;
-  box-shadow: 0 18px 60px rgba(0,0,0,0.35);
-  backdrop-filter: blur(10px);
-}
-.card.wide{grid-column: 1 / -1}
-
-.profileFacts .factRow{margin:6px 0; color: var(--muted)}
-.profileFacts .factRow span{color: var(--text); font-weight:600}
-
-.blinkiesGrid{display:flex; gap:8px; flex-wrap:wrap}
-.blinkie{
-  font-size:12px;
-  padding: 6px 10px;
-  border-radius:999px;
-  border: 1px dashed rgba(255,255,255,0.18);
-  background: rgba(0,0,0,0.22);
-}
-.blinkie.alt{border-style:solid; opacity:0.9}
-
-.linkList{margin:0;padding-left:18px}
-.linkList li{margin: 6px 0}
-
-.thriftGrid{display:grid; gap:10px}
-.thriftRow{
-  padding: 10px 12px;
-  border-radius: 14px;
-  border: 1px solid rgba(255,255,255,0.08);
-  background: rgba(0,0,0,0.18);
-  color: rgba(234,255,242,0.80);
-}
-.thriftRow span{color: rgba(234,255,242,0.70); margin-right: 8px}
-
-.top8Grid{
-  display:grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
-}
-@media (max-width: 900px){
-  .top8Grid{grid-template-columns: repeat(2, 1fr)}
-}
-.top8Card{
-  padding: 10px 12px;
-  border-radius: 14px;
-  border: 1px solid rgba(255,255,255,0.08);
-  background: rgba(0,0,0,0.18);
-  color: rgba(234,255,242,0.80);
-}
-
-/* ---------- Overlay ---------- */
+/* =========================================================
+   Enter overlay
+   ========================================================= */
 .overlay{
   position: fixed;
   inset: 0;
+  z-index: 9999;
   display: grid;
   place-items: center;
-  z-index: 9999;
-  background: rgba(0,0,0,0.60);
+  background: rgba(0,0,0,0.72);
+  backdrop-filter: blur(6px);
 }
+
 .overlayCard{
-  width: min(640px, calc(100% - 28px));
+  width: min(560px, calc(100% - 28px));
   padding: 18px;
   border-radius: 18px;
-  background: rgba(14, 22, 17, 0.92);
+  background: rgba(20, 30, 25, 0.88);
   border: 1px solid rgba(255,255,255,0.14);
-  box-shadow: 0 18px 80px rgba(0,0,0,0.55);
+  box-shadow: 0 18px 70px rgba(0,0,0,0.55);
 }
-.blinkiesRow{display:flex; gap:10px; flex-wrap:wrap; margin-bottom: 10px}
-.enterActions{display:flex; gap:10px; margin: 12px 0}
+
+.blinkiesRow{
+  display:flex;
+  gap:10px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.blinkie{
+  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(0,0,0,0.35);
+  border: 1px solid rgba(255,255,255,0.12);
+  animation: blink 1.1s steps(2,end) infinite;
+}
+
+.blinkie.alt{ animation-duration: 0.8s; }
+
+@keyframes blink{ 50%{ filter: brightness(1.35); } }
+
+.enterActions{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin: 12px 0;
+}
 
 button{
+  font-family: inherit;
   border: 1px solid rgba(255,255,255,0.14);
-  background: rgba(255,123,209,0.20);
+  background: rgba(0,0,0,0.35);
   color: var(--text);
-  padding: 10px 14px;
-  border-radius: 14px;
-  cursor:pointer;
+  padding: 10px 12px;
+  border-radius: 12px;
+  cursor: pointer;
+  box-shadow: 0 8px 18px rgba(0,0,0,0.25);
+  transition: transform .12s ease, filter .12s ease, border-color .12s ease;
 }
-button.secondary{
-  background: rgba(0,0,0,0.25);
+button:hover{
+  transform: translateY(-1px);
+  border-color: rgba(255,123,209,0.55);
+  filter: brightness(1.06);
 }
-button:hover{filter:brightness(1.08)}
+button.secondary{ background: rgba(0,0,0,0.22); }
 
-/* ---------- FOREST SCENE (IMPORTANT FIXES) ---------- */
+.miniBtn{
+  font-size: 12px;
+  padding: 7px 10px;
+  border-radius: 10px;
+}
+.miniBtn.secondary{ opacity: 0.9; }
+
+/* =========================================================
+   Glitter hover (no external file needed)
+   ========================================================= */
+.glitter-hover{ position: relative; }
+.glitter-hover::after{
+  content:"";
+  position:absolute;
+  inset:-6px;
+  border-radius: 18px;
+  opacity:0;
+  pointer-events:none;
+  background:
+    radial-gradient(circle at 10% 20%, rgba(255,255,255,0.22), transparent 35%),
+    radial-gradient(circle at 80% 30%, rgba(255,123,209,0.18), transparent 40%),
+    radial-gradient(circle at 40% 80%, rgba(140,255,194,0.16), transparent 45%),
+    conic-gradient(from 90deg, rgba(255,255,255,0.0), rgba(255,255,255,0.18), rgba(255,255,255,0.0));
+  mix-blend-mode: screen;
+  filter: saturate(1.2) contrast(1.05);
+  transition: opacity 160ms ease;
+}
+.glitter-hover:hover::after{ opacity: 0.55; }
+
+/* =========================================================
+   Forest scene
+   ========================================================= */
 #scene{
   position: relative;
-  width: 100%;
-  height: 420px;
-  margin-top: 10px;
+  width: min(1100px, calc(100% - 28px));
+  margin: 16px auto 6px auto;
+  height: 440px;
   border-radius: 18px;
   overflow: hidden;
   border: 1px solid rgba(255,255,255,0.14);
-
-  /* YOUR REAL PATH */
-  background-image: url("assets/ui/bg-forest.png");
-  background-size: cover;
-  background-position: center bottom;
-  background-repeat: no-repeat;
+  background: rgba(0,0,0,0.18);
 }
 
-/* This layer MUST be transparent */
-#sceneLayer{
+#scene::before{
+  content:"";
   position:absolute;
   inset:0;
+  background: radial-gradient(circle at 40% 20%, rgba(0,0,0,0.00), rgba(0,0,0,0.35));
   pointer-events:none;
-  background: transparent;
+  z-index: 0;
 }
 
-/* mushrooms are IMG elements */
+#scene .layer{
+  position:absolute;
+  inset:0;
+  z-index: 1;
+
+  /* ✅ background is applied via JS too, but CSS fallback helps */
+  background: url("./assets/ui/bg-forest.png") center / cover no-repeat;
+}
+
 .mushroom{
   position:absolute;
+  width: 80px;
   height:auto;
-  user-select:none;
   pointer-events:none;
+  user-select:none;
   filter: drop-shadow(0 10px 10px rgba(0,0,0,0.25));
 }
 
-/* cats are DIVs using background spritesheets */
 .kitty{
   position:absolute;
-  width: 112px;
-  height: 112px;
+  width: 120px;
+  height: 120px;
   pointer-events:none;
   user-select:none;
   transform-origin: 50% 80%;
@@ -235,108 +189,205 @@ button:hover{filter:brightness(1.08)}
   transform: scaleX(var(--facing, 1));
 }
 
-/* 8-frame sheets => 800% width */
+/* ✅ slower sprite cycles */
 .kitty.orange.run{
-  background: url("assets/cats/orange_run.png") 0 0 / 800% 100% no-repeat;
-  animation: run 700ms steps(8) infinite;
-}
-.kitty.orange.idle{
-  background: url("assets/cats/orange_stretch.png") 0 0 / 800% 100% no-repeat;
-  animation: run 1200ms steps(8) infinite;
-}
-
-.kitty.black.run{
-  background: url("assets/cats/black_run.png") 0 0 / 800% 100% no-repeat;
-  animation: run 620ms steps(8) infinite;
-}
-.kitty.black.idle{
-  background: url("assets/cats/black_idle.png") center / contain no-repeat;
-  animation: kittyBob 520ms ease-in-out infinite;
-}
-
-.kitty.grey.walk{
-  background: url("assets/cats/grey_walk.png") 0 0 / 800% 100% no-repeat;
-  animation: run 1000ms steps(8) infinite;
-}
-.kitty.grey.sleep{
-  background: url("assets/cats/grey_sleep.png") 0 0 / 800% 100% no-repeat;
+  background: url("./assets/cats/orange_run.png") 0 0 / 800% 100% no-repeat;
   animation: run 1400ms steps(8) infinite;
 }
-.kitty.grey.hiss{
-  background: url("assets/cats/grey_hiss.png") 0 0 / 800% 100% no-repeat;
-  animation: run 800ms steps(8) infinite;
+.kitty.black.run{
+  background: url("./assets/cats/black_run.png") 0 0 / 800% 100% no-repeat;
+  animation: run 1300ms steps(8) infinite;
 }
-.kitty.grey.idle{
-  background: url("assets/cats/grey_idle.png") center / contain no-repeat;
-  animation: kittyBob 900ms ease-in-out infinite;
-}
-
-/* hop overlay */
-.kitty.hop{
-  animation-name: hopBob, run;
-  animation-duration: 240ms, 700ms;
-  animation-iteration-count: 1, infinite;
-  animation-timing-function: ease-out, steps(8);
+.kitty.grey.walk{
+  background: url("./assets/cats/grey_walk.png") 0 0 / 800% 100% no-repeat;
+  animation: run 1800ms steps(8) infinite;
 }
 
-@keyframes run{ to{ background-position: 100% 0; } }
-@keyframes kittyBob{
-  0%,100%{ translate: 0 0; }
-  50%{ translate: 0 -2px; }
-}
-@keyframes hopBob{
-  0%{ translate: 0 0; }
-  60%{ translate: 0 -18px; }
-  100%{ translate: 0 0; }
+@keyframes run { to { background-position: 100% 0; } }
+
+/* =========================================================
+   Layout/cards
+   ========================================================= */
+.container{
+  width: min(1100px, calc(100% - 28px));
+  margin: 0 auto;
+  padding: 10px 0 30px 0;
+  position: relative;
+  z-index: 2;
 }
 
-/* ---------- Dragon game ---------- */
+.profileHeader{
+  background: var(--card);
+  border: 1px solid var(--stroke);
+  border-radius: 18px;
+  padding: 14px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+  backdrop-filter: blur(10px);
+  margin-bottom: 14px;
+}
+
+.headerTop{
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.badge{
+  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(0,0,0,0.35);
+  border: 1px solid rgba(255,255,255,0.12);
+}
+
+.nowPlaying{
+  display:flex;
+  align-items:center;
+  gap: 8px;
+}
+
+.npLabel{ font-size: 12px; color: var(--muted); }
+.npText{ font-size: 12px; }
+
+.status{ margin: 8px 0 0 0; color: var(--muted); }
+.sparkle{ color: var(--accent2); }
+
+.marqueeWrap{
+  margin-top: 10px;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(0,0,0,0.25);
+}
+.marquee{
+  white-space: nowrap;
+  padding: 8px 10px;
+  display:inline-block;
+  animation: scroll 14s linear infinite;
+}
+@keyframes scroll{
+  from{ transform: translateX(0); }
+  to{ transform: translateX(-50%); }
+}
+
+.grid{
+  display:grid;
+  grid-template-columns: 1.35fr 0.95fr;
+  gap: 14px;
+}
+@media (max-width: 900px){
+  .grid{ grid-template-columns: 1fr; }
+}
+
+.card{
+  background: var(--card);
+  border: 1px solid var(--stroke);
+  border-radius: 18px;
+  padding: 14px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+  backdrop-filter: blur(10px);
+}
+.card.wide{ grid-column: 1 / -1; }
+
+.divider{
+  height: 1px;
+  background: rgba(255,255,255,0.10);
+  margin: 12px 0;
+}
+
+.blinkiesGrid{
+  display:flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.linkList{
+  margin: 0;
+  padding-left: 18px;
+}
+.linkList li{ margin: 8px 0; }
+
+.thriftGrid{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+@media (max-width: 900px){
+  .thriftGrid{ grid-template-columns: 1fr; }
+}
+.thriftRow{
+  padding: 10px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(0,0,0,0.24);
+  color: var(--muted);
+}
+.thriftRow span{ color: var(--text); opacity: 0.9; margin-right: 6px; }
+
+.top8Grid{
+  display:grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+@media (max-width: 900px){
+  .top8Grid{ grid-template-columns: repeat(2, 1fr); }
+}
+.top8Card{
+  padding: 10px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(0,0,0,0.22);
+  color: var(--muted);
+}
+
+/* =========================================================
+   Dragon game
+   ========================================================= */
 .gameWrap{
   margin-top: 10px;
-  padding: 12px;
-  border-radius: 18px;
+  padding: 10px;
+  border-radius: 16px;
   border: 1px solid rgba(255,255,255,0.10);
-  background: rgba(0,0,0,0.18);
+  background: rgba(0,0,0,0.22);
 }
-.choices{display:flex; gap:10px; flex-wrap:wrap; margin: 10px 0}
-.chip{
-  padding: 10px 14px;
-  border-radius: 999px;
-  background: rgba(0,0,0,0.25);
-  border: 1px solid rgba(255,255,255,0.14);
+.gameStep{ margin: 10px 0; }
+.choices{
+  display:flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
 }
-.chip.secondary{opacity:0.85}
-
-.resultText{margin: 8px 0 6px; font-weight: 600}
+.resultText{
+  margin: 10px 0 0 0;
+  color: var(--text);
+}
 
 .dragonStage{
-  display:flex;
-  gap: 12px;
-  align-items:center;
-  flex-wrap:wrap;
-  margin-bottom: 10px;
-}
-.dragonCard{
-  width: 120px;
-  height: 120px;
-  border-radius: 18px;
-  border: 1px solid rgba(255,255,255,0.12);
-  background: rgba(0,0,0,0.25);
-  display:grid;
-  place-items:center;
-  overflow:hidden;
-}
-.dragonCard img{
   width: 100%;
-  height: 100%;
-  object-fit: contain;
-  display:block;
+  height: 260px;
+  margin: 10px 0 12px 0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background: radial-gradient(circle at center, rgba(255,255,255,0.06), rgba(0,0,0,0.35));
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.12);
+}
+#dragonImg{
+  max-height: 220px;
+  max-width: 100%;
+  filter: drop-shadow(0 12px 20px rgba(0,0,0,0.45));
+  animation: dragonFloat 2.8s ease-in-out infinite;
+}
+@keyframes dragonFloat{
+  0%,100%{ transform: translateY(0); }
+  50%{ transform: translateY(-8px); }
 }
 
-/* ---------- Footer ---------- */
 .footer{
-  margin-top: 14px;
   text-align:center;
-  color: rgba(234,255,242,0.65);
-  font-size: 12px;
+  margin-top: 14px;
+  color: var(--muted);
 }
